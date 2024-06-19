@@ -15,6 +15,11 @@ import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressScree
 import com.example.rentingproject.ui.ListScreen.Account.Payment.PaymentMethodScreen
 import com.example.rentingproject.ui.ListScreen.Account.Personalnfo.PersonalInfoScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.CleanerScreen
+import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.CleanerHomePage
+import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.AllJobsScreen
+import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.EditJobScreen
+import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.PostJobScreen
+import com.example.rentingproject.ui.ListScreen.Cleaner.myjob.MyJobScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.Booking.BookingScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.HomeOwnerHomepageScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.InboxScreen
@@ -64,19 +69,19 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
             PaymentMethodScreen(navController)
         }
 
-
+        composable(Message.route) { MessageScreen(navController = navController) }
 
 
         //Homeowner section
         composable(HomeOwnerHome.route) { HomeOwnerHomepageScreen(navController = navController) }
 
         // Booking section
-        composable(BookingCalendar.route){
+        composable(BookingCalendar.route) {
             BookingScreen(navController)
         }
 
         // ! Same name ( package/class ) with keyword leading to fail the code leading to java.lang.NoClassDefFoundError: Failed resolution of:
-        composable(ServiceDetail.route){
+        composable(ServiceDetail.route) {
             ServiceDetailScreen(navController = navController)
         }
 
@@ -89,9 +94,21 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
         }
 
         //CLeaner section
-        composable(CleanerHome.route) { CleanerScreen(navController = navController) }
-        composable(Message.route) { MessageScreen(navController = navController) }
-
+        composable(CleanerHome.route) { CleanerHomePage(navController = navController) }
+            //? for request section, custommer implement wrong at this stage :(
+        composable(myjob.route) {
+            MyJobScreen(navController = navController)
+        }
+        composable("all_jobs") {
+            AllJobsScreen(navController = navController)
+        }
+        composable("post_job") {
+            PostJobScreen(navController = navController)
+        }
+        composable("edit_job/{serviceName}") { backStackEntry ->
+            val serviceName = backStackEntry.arguments?.getString("serviceName") ?: ""
+            EditJobScreen(navController = navController, serviceName = serviceName)
+        }
 
     }
 
