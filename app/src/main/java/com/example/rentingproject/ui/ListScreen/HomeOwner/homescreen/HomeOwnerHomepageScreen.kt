@@ -1,4 +1,4 @@
-package com.example.rentingproject.ui.ListScreen.HomeOwner
+package com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -29,10 +29,10 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 @Composable
 fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = HomeOwnerHome.route
-
+    val userRole = "HomeOwner"
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute,userRole=userRole)
         }
     ) {
         Column(

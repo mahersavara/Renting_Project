@@ -17,7 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.rentingproject.NavRoute.ServiceDetail
+import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
@@ -25,7 +25,8 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier) {
-    val currentRoute = "cleaner_homepage"
+    val currentRoute = CleanerHome.route
+    val userRole = "Cleaner"
     val requests = remember { mutableStateListOf(
         Request("Cleaning - [Address]", "Request for Sun Mar 31, 5:36pm", "1 hrs ago"),
         Request("Grooming - [Address]", "Request for Sun Mar 31, 6:00pm", "2 hrs ago")
@@ -37,7 +38,7 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = userRole)
         }
     ) {
         Column(
@@ -71,11 +72,21 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
             )
 
             // Requests Section
-            Text(
-                text = "Requests (${requests.size})",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Requests (${requests.size})",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                TextButton(onClick = { navController.navigate(MyJob.route) }) {
+                    Text(text = "All")
+                }
+            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
@@ -88,11 +99,21 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
             Spacer(modifier = Modifier.height(16.dp))
 
             // Listings Section
-            Text(
-                text = "Your listing",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Your listing",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                TextButton(onClick = { navController.navigate(AllJobs.route) }) {
+                    Text(text = "All")
+                }
+            }
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -160,7 +181,7 @@ fun ListingCard(navController: NavController, listing: Listing) {
         modifier = Modifier
             .width(160.dp)
             .height(240.dp)
-            .clickable { navController.navigate(ServiceDetail.route) },
+            .clickable { navController.navigate(ServiceDetail.createRoute(listing.serviceName)) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -211,47 +232,46 @@ data class Listing(
     val price: String,
     val rating: Double
 )
-
-@Composable
-fun BottomNavigationBar(
-    navController: NavController,
-    currentRoute: String,
-    modifier: Modifier = Modifier
-) {
-    val items = listOf(
-        BottomNavItem("homeowner", R.drawable.ic_home, "Home"),
-        BottomNavItem("job", R.drawable.ic_job, "My Job"),
-        BottomNavItem("booking", R.drawable.ic_booking, "Booking"),
-        BottomNavItem("message", R.drawable.ic_message, "Message"),
-        BottomNavItem("account", R.drawable.ic_me, "Me")
-    )
-
-    NavigationBar(
-        modifier = modifier
-    ) {
-        items.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(id = item.icon),
-                        contentDescription = item.label
-                    )
-                },
-                selected = currentRoute == item.route,
-                onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-data class BottomNavItem(val route: String, val icon: Int, val label: String)
+//
+//
+//@Composable
+//fun BottomNavigationBar(
+//    navController: NavController,
+//    currentRoute: String,
+//    modifier: Modifier = Modifier
+//) {
+//    val items = listOf(
+//        BottomNavItem(CleanerHome.route, R.drawable.ic_home, "Home"),
+//        BottomNavItem(MyJob.route, R.drawable.ic_job, "My Job"),
+//        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+//        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+//        BottomNavItem(Account.route, R.drawable.ic_me, "Me")
+//    )
+//
+//    NavigationBar(
+//        modifier = modifier
+//    ) {
+//        items.forEach { item ->
+//            NavigationBarItem(
+//                icon = {
+//                    Icon(
+//                        painter = painterResource(id = item.icon),
+//                        contentDescription = item.label
+//                    )
+//                },
+//                selected = currentRoute == item.route,
+//                onClick = {
+//                    if (currentRoute != item.route) {
+//                        navController.navigate(item.route) {
+//                            launchSingleTop = true
+//                            restoreState = true
+//                            popUpTo(navController.graph.startDestinationId) {
+//                                saveState = true
+//                            }
+//                        }
+//                    }
+//                }
+//            )
+//        }
+//    }
+//}

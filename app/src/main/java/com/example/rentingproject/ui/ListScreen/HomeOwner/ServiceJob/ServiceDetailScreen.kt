@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rentingproject.R
-import com.example.rentingproject.ui.ListScreen.HomeOwner.CleanerCard
+import com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen.CleanerCard
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)

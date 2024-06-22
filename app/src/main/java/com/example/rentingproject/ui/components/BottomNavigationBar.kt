@@ -1,5 +1,6 @@
 package com.example.rentingproject.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -9,21 +10,32 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.rentingproject.NavRoute.Account
 import com.example.rentingproject.NavRoute.BookingCalendar
+import com.example.rentingproject.NavRoute.CleanerHome
 import com.example.rentingproject.NavRoute.HomeOwnerHome
 import com.example.rentingproject.NavRoute.Liked
 import com.example.rentingproject.NavRoute.Message
+import com.example.rentingproject.NavRoute.MyJob
 import com.example.rentingproject.R
-
 @Composable
-fun BottomNavigationBar(navController: NavController, currentRoute: String, modifier: Modifier = Modifier) {
-    val items = listOf(
-        //TODO checking for homeowner or cleaner
-        BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
-        BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
-        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
-        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
-        BottomNavItem(Account.route, R.drawable.ic_me, "Account")
-    )
+fun BottomNavigationBar(navController: NavController, currentRoute: String, userRole: String ="HomeOwner" // current not migrate with firebase
+                        , @SuppressLint("ModifierParameter") modifier: Modifier = Modifier) {
+    val items = if (userRole == "HomeOwner") {
+        listOf(
+            BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
+            BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
+            BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+            BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+            BottomNavItem(Account.route, R.drawable.ic_me, "Account")
+        )
+    } else {
+        listOf(
+            BottomNavItem(CleanerHome.route, R.drawable.ic_home, "Home"),
+            BottomNavItem(MyJob.route, R.drawable.ic_job, "My Job"),
+            BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+            BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+            BottomNavItem(Account.route, R.drawable.ic_me, "Me")
+        )
+    }
 
     NavigationBar(
         modifier = modifier
@@ -35,11 +47,8 @@ fun BottomNavigationBar(navController: NavController, currentRoute: String, modi
                 onClick = {
                     if (currentRoute != item.route) {
                         navController.navigate(item.route) {
-                            // Avoid multiple copies of the same destination in the back stack
                             launchSingleTop = true
-                            // Restore state when reselecting a previously selected item
                             restoreState = true
-                            // Clear the back stack to the root of the graph
                             popUpTo(navController.graph.startDestinationId) {
                                 saveState = true
                             }
