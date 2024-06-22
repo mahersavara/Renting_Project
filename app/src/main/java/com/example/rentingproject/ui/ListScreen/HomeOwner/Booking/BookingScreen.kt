@@ -42,6 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.Account
+import com.example.rentingproject.NavRoute.BookingCalendar
+import com.example.rentingproject.NavRoute.HomeOwnerHome
+import com.example.rentingproject.NavRoute.Liked
+import com.example.rentingproject.NavRoute.Message
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
@@ -192,11 +197,11 @@ data class BottomNavItem(val route: String, val icon: Int, val label: String)
 @Composable
 fun BottomNavigationBar(navController: NavController, currentRoute: String, modifier: Modifier = Modifier) {
     val items = listOf(
-        BottomNavItem("homeowner", R.drawable.ic_home, "Home"),
-        BottomNavItem("liked", R.drawable.ic_liked, "Liked"),
-        BottomNavItem("booking", R.drawable.ic_booking, "Booking"),
-        BottomNavItem("message", R.drawable.ic_message, "Message"),
-        BottomNavItem("account", R.drawable.ic_me, "Account")
+        BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
+        BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
+        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+        BottomNavItem(Account.route, R.drawable.ic_me, "Account")
     )
 
     NavigationBar(

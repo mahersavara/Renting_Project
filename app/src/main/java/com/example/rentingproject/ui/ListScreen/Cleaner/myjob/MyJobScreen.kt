@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.MyJob
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
@@ -42,7 +43,7 @@ fun MyJobScreen(navController: NavController, modifier: Modifier = Modifier) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = "my_job")
+            BottomNavigationBar(navController = navController, currentRoute = MyJob.route)
         }
     ) {
         LazyColumn(

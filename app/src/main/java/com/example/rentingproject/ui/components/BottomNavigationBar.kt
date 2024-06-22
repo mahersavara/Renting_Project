@@ -7,17 +7,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.Account
+import com.example.rentingproject.NavRoute.BookingCalendar
+import com.example.rentingproject.NavRoute.HomeOwnerHome
+import com.example.rentingproject.NavRoute.Liked
+import com.example.rentingproject.NavRoute.Message
 import com.example.rentingproject.R
 
 @Composable
 fun BottomNavigationBar(navController: NavController, currentRoute: String, modifier: Modifier = Modifier) {
     val items = listOf(
         //TODO checking for homeowner or cleaner
-        BottomNavItem("homeowner", R.drawable.ic_home, "Home"),
-        BottomNavItem("liked", R.drawable.ic_liked, "Liked"),
-        BottomNavItem("booking", R.drawable.ic_booking, "Booking"),
-        BottomNavItem("message", R.drawable.ic_message, "Message"),
-        BottomNavItem("account", R.drawable.ic_me, "Account")
+        BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
+        BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
+        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+        BottomNavItem(Account.route, R.drawable.ic_me, "Account")
     )
 
     NavigationBar(

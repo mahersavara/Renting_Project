@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.Account
 import com.example.rentingproject.NavRoute.Login
 import com.example.rentingproject.NavRoute.PersonalInfo
 import com.example.rentingproject.R
@@ -24,7 +25,7 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 @Composable
 fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
     // Current route for bottom navigation
-    val currentRoute = "me"
+    val currentRoute = Account.route
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,7 +75,7 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Verify your email for enhanced account protection.", modifier = Modifier.weight(1f))
-                    Button(onClick = { /* Handle Email Verification */ }) {
+                    Button(onClick = { /* Handle Email Verification ( Not Available ) version 1.0 */ }) {
                         Text("Verify")
                     }
                 }

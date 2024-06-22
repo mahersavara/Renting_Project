@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.ServiceDetail
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
@@ -159,7 +160,7 @@ fun ListingCard(navController: NavController, listing: Listing) {
         modifier = Modifier
             .width(160.dp)
             .height(240.dp)
-            .clickable { navController.navigate("service_detail") },
+            .clickable { navController.navigate(ServiceDetail.route) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

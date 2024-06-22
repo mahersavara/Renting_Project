@@ -49,7 +49,7 @@ fun SplashScreen(navController: NavController, dataStoreHelper: DataStoreHelper)
             navController.navigate(IntroduceScreen.route) {
                 //TODO CHECK BUGS OF THIS ONE
                 Log.d("AAAAA", "SplashScreen: 1")
-//                popUpTo(SplashScreen.route) { inclusive = true }
+                popUpTo(SplashScreen.route) { inclusive = true }
             }
             dataStoreHelper.setFirstTime(false)
         } else {

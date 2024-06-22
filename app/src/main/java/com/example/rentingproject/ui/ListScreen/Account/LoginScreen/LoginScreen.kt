@@ -1,4 +1,4 @@
-package com.example.rentingproject.ui.ListScreen.LoginScreen
+package com.example.rentingproject.ui.ListScreen.Account.LoginScreen
 
 
 // viet ui nhung chi implement happy case
@@ -153,7 +153,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier= Modifier) {
                 onClick = {
                     if (isEmailOrPhoneValid && isPasswordValid) {
                         //TODO Perform login
-                        navController.navigate(HomeOwnerHome.route)
+                        navController.navigate(CleanerHome.route)
                     } else {
                         if (!isEmailOrPhoneValid) isEmailOrPhoneValid = false
                         if (!isPasswordValid) isPasswordValid = false

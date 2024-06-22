@@ -1,8 +1,5 @@
 package com.example.rentingproject.NavRoute
 
-class NavigationDestination {
-}
-
 interface Destination {
     val route: String
 }
@@ -35,6 +32,7 @@ object PersonalInfo : Destination {
 object MyAddress : Destination {
     override val route = "myaddress"
 }
+// this is for show and change address
 object MyAddressDetail: Destination{
     override val route = "myaddressdetail"
 }
@@ -60,8 +58,10 @@ object HomeOwnerHome : Destination {
 }
 
 
-object ServiceDetail : Destination{
-    override val route = "servicedetail"
+object ServiceDetail : Destination {
+    const val serviceNameArg = "serviceName"
+    override val route = "servicedetail/{$serviceNameArg}"
+    fun createRoute(serviceName: String) = "servicedetail/$serviceName"
 }
 
 
@@ -72,7 +72,7 @@ object BookingCalendar: Destination {
     override val route= "bookingcalendar"
 }
 // ??? tai sao hmmm chac la mo luc trong Booking section - cai nay khac voi TODO service detail yeppp
-// chua co man hinh -> chua can lam, yep
+// chua co man hinh -> chua can lam, yep gan chung voi thang service detail vay
 object orderdetail:Destination{
     override val route= "orderdetail"
 }
@@ -81,18 +81,17 @@ object orderdetail:Destination{
 object Liked: Destination {
     override val route= "liked"
 }
-object servicedetail:Destination{
-    override val route= "servicedetail"
-}
 
 object ratingdetail:Destination{
     override val route= "ratingdetail"
 }
 
         // Book now section
+// user choose delivery address from delivery address screen already implement above
 object deliveryAddress:Destination{
     override val route= "deliveryAdress"
 }
+// this for change delivery address, already implemented above
 object deliveryAddressDetail:Destination{
     override val route= "deliveryAddressDetail"
 }
@@ -107,8 +106,11 @@ object orderstatus:Destination{
 object transactionhistory:Destination{
     override val route= "transactionhistory"
 }
-object transactionreview:Destination{
-    override val route= "transactionreview"
+
+object LeaveReview : Destination {
+    const val serviceNameArg = "serviceName"
+    override val route = "leave_review/{$serviceNameArg}"
+    fun createRoute(serviceName: String) = "leave_review/$serviceName"
 }
 
 
@@ -116,21 +118,32 @@ object transactionreview:Destination{
 //TODO: Sprint 3: Cleaner Management System UI
 
 // yeah, chia nhu nay co ve hop ly day ^^
-
 object CleanerHome : Destination {
     override val route = "cleaner"
 }
-    // my job section
-object myjob : Destination {
+
+object MyJob : Destination {
     override val route = "myjob"
 }
 
-object myjobdetail : Destination {
+object MyJobDetail : Destination {
     override val route = "myjobdetail"
 }
-object postnewjob : Destination {
-    override val route = "postnewjob"
+
+object PostJob : Destination {
+    override val route = "postjob"
 }
+
+object AllJobs : Destination {
+    override val route = "all_jobs"
+}
+
+object EditJob : Destination {
+    const val serviceNameArg = "serviceName"
+    override val route = "edit_job/{$serviceNameArg}"
+    fun createRoute(serviceName: String) = "edit_job/$serviceName"
+}
+
 
     // chung message screen
     // chung address book

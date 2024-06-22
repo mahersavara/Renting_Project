@@ -16,6 +16,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.AllJobs
+import com.example.rentingproject.NavRoute.EditJob
+import com.example.rentingproject.NavRoute.PostJob
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
@@ -41,10 +44,10 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = "all_jobs")
+            BottomNavigationBar(navController = navController, currentRoute = AllJobs.route)
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("post_job") }) {
+            FloatingActionButton(onClick = { navController.navigate(PostJob.route) }) {
                 Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add")
             }
         }
@@ -61,13 +64,14 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
     }
 }
 
+
 @Composable
 fun JobItem(navController: NavController, job: Listing) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { navController.navigate("edit_job/${job.serviceName}") },
+            .clickable { navController.navigate(EditJob.createRoute(job.serviceName)) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -93,6 +97,7 @@ fun JobItem(navController: NavController, job: Listing) {
         }
     }
 }
+
 
 data class Listing(
     val serviceName: String,

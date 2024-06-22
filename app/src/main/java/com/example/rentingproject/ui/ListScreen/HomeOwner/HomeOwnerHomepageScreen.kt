@@ -4,34 +4,23 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.Account
+import com.example.rentingproject.NavRoute.BookingCalendar
+import com.example.rentingproject.NavRoute.HomeOwnerHome
+import com.example.rentingproject.NavRoute.Liked
+import com.example.rentingproject.NavRoute.Message
+import com.example.rentingproject.NavRoute.ServiceDetail
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
@@ -39,7 +28,7 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = Modifier) {
-    val currentRoute = "homeowner"
+    val currentRoute = HomeOwnerHome.route
 
     Scaffold(
         bottomBar = {
@@ -112,7 +101,7 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(4) { index ->
-                    CleanerCard(navController = navController)
+                    CleanerCard(navController = navController, serviceName = "Cleaner $index")
                 }
             }
         }
@@ -120,12 +109,14 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
 }
 
 @Composable
-fun CleanerCard(navController: NavController) {
+fun CleanerCard(navController: NavController, serviceName: String) {
+    var isLiked by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .width(160.dp)
             .height(240.dp)
-            .clickable { navController.navigate("service_detail") },
+            .clickable { navController.navigate(ServiceDetail.createRoute(serviceName)) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -142,7 +133,7 @@ fun CleanerCard(navController: NavController) {
                     .height(120.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Cleaner 1", style = MaterialTheme.typography.bodyMedium)
+            Text(text = serviceName, style = MaterialTheme.typography.bodyMedium)
             Text(text = "Location", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.weight(1f))
             Row(
@@ -160,6 +151,12 @@ fun CleanerCard(navController: NavController) {
                     Text(text = "4.9", style = MaterialTheme.typography.bodyMedium)
                 }
             }
+            IconButton(onClick = { isLiked = !isLiked }) {
+                Icon(
+                    painter = painterResource(id = if (isLiked) R.drawable.ic_liked else R.drawable.ic_like),
+                    contentDescription = "Like Button"
+                )
+            }
         }
     }
 }
@@ -173,11 +170,11 @@ fun BottomNavigationBar(
     modifier: Modifier = Modifier
 ) {
     val items = listOf(
-        BottomNavItem("homeowner", R.drawable.ic_home, "Home"),
-        BottomNavItem("liked", R.drawable.ic_liked, "Liked"),
-        BottomNavItem("booking", R.drawable.ic_booking, "Booking"),
-        BottomNavItem("message", R.drawable.ic_message, "Message"),
-        BottomNavItem("account", R.drawable.ic_me, "Account")
+        BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
+        BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
+        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+        BottomNavItem(Account.route, R.drawable.ic_me, "Account")
     )
 
     NavigationBar(

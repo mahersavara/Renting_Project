@@ -28,7 +28,8 @@ import com.example.rentingproject.ui.ListScreen.HomeOwner.Review.LeaveReviewScre
 import com.example.rentingproject.ui.ListScreen.HomeOwner.Review.TransactionHistoryScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.ServiceDetailScreen
 import com.example.rentingproject.ui.ListScreen.IntroduceScreen.IntroduceScreen
-import com.example.rentingproject.ui.ListScreen.LoginScreen.LoginScreen
+import com.example.rentingproject.ui.ListScreen.Account.LoginScreen.LoginScreen
+import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
 import com.example.rentingproject.ui.ListScreen.RegisterScreen.SignUpScreen
 import com.example.rentingproject.ui.ListScreen.SplashScreen.SplashScreen
 import com.example.rentingproject.utils.DataStoreHelper
@@ -78,35 +79,42 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
         // Booking section
         composable(BookingCalendar.route) {
             BookingScreen(navController)
+            // maybe go to the delivery route -> oder success / fail
         }
 
         // ! Same name ( package/class ) with keyword leading to fail the code leading to java.lang.NoClassDefFoundError: Failed resolution of:
-        composable(ServiceDetail.route) {
-            ServiceDetailScreen(navController = navController)
+        composable(ServiceDetail.route,
+            arguments = listOf(navArgument(ServiceDetail.serviceNameArg) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val serviceName = backStackEntry.arguments?.getString(ServiceDetail.serviceNameArg) ?: ""
+            ServiceDetailScreen(navController = navController, serviceName = serviceName)
+        }
+        composable(Liked.route){
+            LikedServiceScreen(navController)
         }
 
-        composable("transaction_history") {
+        composable(transactionhistory.route) {
             TransactionHistoryScreen(navController = navController)
         }
-        composable("leave_review/{serviceName}") { backStackEntry ->
-            val serviceName = backStackEntry.arguments?.getString("serviceName") ?: ""
+        composable(
+            route = LeaveReview.route,
+            arguments = listOf(navArgument(LeaveReview.serviceNameArg) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val serviceName = backStackEntry.arguments?.getString(LeaveReview.serviceNameArg) ?: ""
             LeaveReviewScreen(navController = navController, serviceName = serviceName)
         }
 
         //CLeaner section
         composable(CleanerHome.route) { CleanerHomePage(navController = navController) }
             //? for request section, custommer implement wrong at this stage :(
-        composable(myjob.route) {
-            MyJobScreen(navController = navController)
-        }
-        composable("all_jobs") {
-            AllJobsScreen(navController = navController)
-        }
-        composable("post_job") {
-            PostJobScreen(navController = navController)
-        }
-        composable("edit_job/{serviceName}") { backStackEntry ->
-            val serviceName = backStackEntry.arguments?.getString("serviceName") ?: ""
+        composable(MyJob.route) { MyJobScreen(navController = navController) }
+        composable(AllJobs.route) { AllJobsScreen(navController = navController) }
+        composable(PostJob.route) { PostJobScreen(navController = navController) }
+        composable(
+            route = EditJob.route,
+            arguments = listOf(navArgument(EditJob.serviceNameArg) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val serviceName = backStackEntry.arguments?.getString(EditJob.serviceNameArg) ?: ""
             EditJobScreen(navController = navController, serviceName = serviceName)
         }
 

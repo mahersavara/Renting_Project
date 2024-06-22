@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.rentingproject.NavRoute.LeaveReview
 import com.example.rentingproject.R
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -66,7 +67,6 @@ fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = 
         }
     }
 }
-
 @Composable
 fun TransactionItem(navController: NavController, transaction: Transaction) {
     Card(
@@ -97,7 +97,7 @@ fun TransactionItem(navController: NavController, transaction: Transaction) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = { navController.navigate("leave_review/${transaction.serviceName}") },
+                onClick = { navController.navigate(LeaveReview.createRoute(transaction.serviceName)) },
                 enabled = !transaction.reviewed
             ) {
                 Text(text = if (transaction.reviewed) "Reviewed" else "Review")
@@ -105,6 +105,7 @@ fun TransactionItem(navController: NavController, transaction: Transaction) {
         }
     }
 }
+
 
 data class Transaction(
     val serviceName: String,
