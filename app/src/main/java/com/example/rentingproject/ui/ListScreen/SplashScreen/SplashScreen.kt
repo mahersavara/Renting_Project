@@ -34,26 +34,25 @@ import timber.log.Timber
 fun SplashScreen(navController: NavController, dataStoreHelper: DataStoreHelper) {
     val scope = rememberCoroutineScope()
     var isFirstTime by remember { mutableStateOf(true) }
-// TODO SETTING IF CONDITION HERE, IF FIRST TIME THEN GO TO SOME INTRODUCE SCREEN ELSE GO TO LOGIN SCREEN
     LaunchedEffect(key1 = true) {
         //fix bug
-        Log.d("AAAAA", "SplashScreen: 0")
+        Timber.tag("AAAAA").d("SplashScreen: 0")
         scope.launch {
             dataStoreHelper.isFirstTime.collect { firstTime ->
                 isFirstTime = firstTime
             }
         }
         delay(3000) // Delay for 3 seconds
-        Log.d("AAAAA", "SplashScreen: 0.5")
+        Timber.tag("AAAAA").d("SplashScreen: 0.5")
         if (isFirstTime) {
             navController.navigate(IntroduceScreen.route) {
                 //TODO CHECK BUGS OF THIS ONE
-                Log.d("AAAAA", "SplashScreen: 1")
+                Timber.tag("AAAAA").d("SplashScreen: 1")
                 popUpTo(SplashScreen.route) { inclusive = true }
             }
             dataStoreHelper.setFirstTime(false)
         } else {
-            Log.d("AAAAA", "SplashScreen: 2")
+            Timber.tag("AAAAA").d("SplashScreen: 2")
             // Later for checking in the firebase if having firebase
             // Coding your own project, mixing with internet, not clone from A sample Project in Internet
             navController.navigate(Login.route) {

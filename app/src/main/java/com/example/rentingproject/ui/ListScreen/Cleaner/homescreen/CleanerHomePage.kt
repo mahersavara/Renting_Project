@@ -21,20 +21,24 @@ import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.tasks.await
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = CleanerHome.route
     val userRole = "Cleaner"
-    val requests = remember { mutableStateListOf(
-        Request("Cleaning - [Address]", "Request for Sun Mar 31, 5:36pm", "1 hrs ago"),
-        Request("Grooming - [Address]", "Request for Sun Mar 31, 6:00pm", "2 hrs ago")
-    ) }
-    val listings = remember { mutableStateListOf(
-        Listing("Cleaning", "Location", "$40", 4.9),
-        Listing("Grooming", "Location", "$40", 4.9)
-    ) }
+    val firebaseHelper = FirebaseHelper()
+    var address by remember { mutableStateOf("") }
+    var requests by remember { mutableStateOf(listOf<Request>()) }
+    var listings by remember { mutableStateOf(listOf<Listing>()) }
+
+    LaunchedEffect(Unit) {
+        address = firebaseHelper.getUserAddress(firebaseHelper.auth.currentUser?.uid.orEmpty())
+        requests = firebaseHelper.getRequests(firebaseHelper.auth.currentUser?.uid.orEmpty())
+        listings = firebaseHelper.getListings(firebaseHelper.auth.currentUser?.uid.orEmpty())
+    }
 
     Scaffold(
         bottomBar = {
@@ -54,9 +58,9 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Address", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Address: $address", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = { /* Handle Address Edit */ }) {
+                IconButton(onClick = { navController.navigate(MyAddress.route) }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_edit),
                         contentDescription = "Edit Address"
@@ -66,7 +70,7 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
 
             // Booking Info
             Text(
-                text = "My Address is at [Address]",
+                text = "My Address is at $address",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -232,46 +236,3 @@ data class Listing(
     val price: String,
     val rating: Double
 )
-//
-//
-//@Composable
-//fun BottomNavigationBar(
-//    navController: NavController,
-//    currentRoute: String,
-//    modifier: Modifier = Modifier
-//) {
-//    val items = listOf(
-//        BottomNavItem(CleanerHome.route, R.drawable.ic_home, "Home"),
-//        BottomNavItem(MyJob.route, R.drawable.ic_job, "My Job"),
-//        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
-//        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
-//        BottomNavItem(Account.route, R.drawable.ic_me, "Me")
-//    )
-//
-//    NavigationBar(
-//        modifier = modifier
-//    ) {
-//        items.forEach { item ->
-//            NavigationBarItem(
-//                icon = {
-//                    Icon(
-//                        painter = painterResource(id = item.icon),
-//                        contentDescription = item.label
-//                    )
-//                },
-//                selected = currentRoute == item.route,
-//                onClick = {
-//                    if (currentRoute != item.route) {
-//                        navController.navigate(item.route) {
-//                            launchSingleTop = true
-//                            restoreState = true
-//                            popUpTo(navController.graph.startDestinationId) {
-//                                saveState = true
-//                            }
-//                        }
-//                    }
-//                }
-//            )
-//        }
-//    }
-//}

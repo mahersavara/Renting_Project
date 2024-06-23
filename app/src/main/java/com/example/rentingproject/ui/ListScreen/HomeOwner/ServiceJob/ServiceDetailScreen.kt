@@ -122,7 +122,7 @@ fun ServiceDetailScreen(navController: NavController, serviceName: String, modif
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(4) { index ->
-                    CleanerCard(navController = navController, serviceName = "Cleaner $index")
+//                    CleanerCard(navController = navController, serviceName = "Cleaner $index")
                 }
             }
         }

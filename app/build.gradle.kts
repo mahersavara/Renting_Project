@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+//    alias(libs.google.services) // Add this line
+    id ("com.google.gms.google-services")
 }
 
 android {
@@ -111,10 +113,14 @@ dependencies {
 
     // Pager
     implementation (libs.accompanist.pager)
+//Firebase
+
+    implementation (libs.firebase.auth)
+    implementation (libs.firebase.firestore)
 
 
-
-
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
 }
 

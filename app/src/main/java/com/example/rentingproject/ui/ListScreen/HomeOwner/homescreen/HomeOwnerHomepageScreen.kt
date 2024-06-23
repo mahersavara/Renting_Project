@@ -15,24 +15,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.rentingproject.NavRoute.Account
-import com.example.rentingproject.NavRoute.BookingCalendar
-import com.example.rentingproject.NavRoute.HomeOwnerHome
-import com.example.rentingproject.NavRoute.Liked
-import com.example.rentingproject.NavRoute.Message
-import com.example.rentingproject.NavRoute.ServiceDetail
+import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.tasks.await
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = HomeOwnerHome.route
     val userRole = "HomeOwner"
+    val firebaseHelper = FirebaseHelper()
+    var address by remember { mutableStateOf("") }
+    var popularServices by remember { mutableStateOf(listOf<Service>()) }
+
+    LaunchedEffect(Unit) {
+        address = firebaseHelper.getUserAddress(firebaseHelper.auth.currentUser?.uid.orEmpty())
+        popularServices = firebaseHelper.getPopularServices()
+    }
+
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = currentRoute,userRole=userRole)
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = userRole)
         }
     ) {
         Column(
@@ -48,9 +54,9 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Address", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Address: $address", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = { /* Handle Address Edit */ }) {
+                IconButton(onClick = { navController.navigate(MyAddress.route) }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_edit),
                         contentDescription = "Edit Address"
@@ -60,7 +66,7 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
 
             // Booking Info
             Text(
-                text = "Book A Cleaning for your House at: [Address]",
+                text = "Book A Cleaning for your House at: $address",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -100,8 +106,9 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(4) { index ->
-                    CleanerCard(navController = navController, serviceName = "Cleaner $index")
+                items(popularServices.size) { index ->
+                    val service = popularServices[index]
+                    CleanerCard(navController = navController, service = service)
                 }
             }
         }
@@ -109,14 +116,14 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
 }
 
 @Composable
-fun CleanerCard(navController: NavController, serviceName: String) {
+fun CleanerCard(navController: NavController, service: Service) {
     var isLiked by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .width(160.dp)
             .height(240.dp)
-            .clickable { navController.navigate(ServiceDetail.createRoute(serviceName)) },
+            .clickable { navController.navigate(ServiceDetail.createRoute(service.name)) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -126,29 +133,29 @@ fun CleanerCard(navController: NavController, serviceName: String) {
                 .padding(8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual cleaner image
-                contentDescription = "Cleaner Image",
+                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual service image
+                contentDescription = "Service Image",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = serviceName, style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Location", style = MaterialTheme.typography.bodySmall)
+            Text(text = service.name, style = MaterialTheme.typography.bodyMedium)
+            Text(text = service.location, style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "$40", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "\$${service.price}", style = MaterialTheme.typography.bodyMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = "Rating",
                         tint = Color.Yellow
                     )
-                    Text(text = "4.9", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             IconButton(onClick = { isLiked = !isLiked }) {
@@ -161,21 +168,37 @@ fun CleanerCard(navController: NavController, serviceName: String) {
     }
 }
 
-data class BottomNavItem(val route: String, val icon: Int, val label: String)
+data class Service(
+    val name: String,
+    val location: String,
+    val price: String,
+    val rating: Double
+)
 
 @Composable
 fun BottomNavigationBar(
     navController: NavController,
     currentRoute: String,
+    userRole: String,
     modifier: Modifier = Modifier
 ) {
-    val items = listOf(
-        BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
-        BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
-        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
-        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
-        BottomNavItem(Account.route, R.drawable.ic_me, "Account")
-    )
+    val items = if (userRole == "HomeOwner") {
+        listOf(
+            BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
+            BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
+            BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+            BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+            BottomNavItem(Account.route, R.drawable.ic_me, "Account")
+        )
+    } else {
+        listOf(
+            BottomNavItem(CleanerHome.route, R.drawable.ic_home, "Home"),
+            BottomNavItem(MyJob.route, R.drawable.ic_job, "My Job"),
+            BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
+            BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
+            BottomNavItem(Account.route, R.drawable.ic_me, "Account")
+        )
+    }
 
     NavigationBar(
         modifier = modifier

@@ -1,4 +1,5 @@
-package com.example.rentingproject.ui.ListScreen.RegisterScreen
+package com.example.rentingproject.ui.ListScreen.Account.RegisterScreen
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,16 +18,22 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rentingproject.NavRoute.Login
 import com.example.rentingproject.R
+import com.example.rentingproject.utils.FirebaseHelper
 
 @Composable
 fun SignUpScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var repeatPassword by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var isPhoneNumberValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
+    var isRepeatPasswordValid by remember { mutableStateOf(true) }
     var passwordVisibility by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val firebaseHelper = FirebaseHelper()
 
     Box(
         modifier = Modifier
@@ -102,6 +109,7 @@ fun SignUpScreen(navController: NavController) {
                 onValueChange = {
                     password = it
                     isPasswordValid = it.any { char -> char.isLetterOrDigit() }
+                    isRepeatPasswordValid = it == repeatPassword
                 },
                 label = { Text("Password") },
                 isError = !isPasswordValid,
@@ -118,17 +126,78 @@ fun SignUpScreen(navController: NavController) {
                 Text(text = "Password must have at least one special character", color = Color.Red, fontSize = 12.sp)
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = repeatPassword,
+                onValueChange = {
+                    repeatPassword = it
+                    isRepeatPasswordValid = it == password
+                },
+                label = { Text("Repeat Password") },
+                isError = !isRepeatPasswordValid,
+                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
+                        Icon(painter = painterResource(id = if (passwordVisibility) R.drawable.ic_visibility_off else R.drawable.ic_visibility), contentDescription = null)
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (!isRepeatPasswordValid) {
+                Text(text = "Passwords do not match", color = Color.Red, fontSize = 12.sp)
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Button(onClick = { /* Handle Homeowner Sign Up */
-                // get to HomeOwnerScreen
+                Button(onClick = {
+                    if (isEmailValid && isPhoneNumberValid && isPasswordValid && isRepeatPasswordValid) {
+                        firebaseHelper.registerUser(email, password) { success, message ->
+                            if (success) {
+                                val user = firebaseHelper.auth.currentUser
+                                user?.let {
+                                    firebaseHelper.setUserRole(it.uid, "HomeOwner") { roleSuccess ->
+                                        if (roleSuccess) {
+                                            navController.navigate(Login.route) {
+                                                popUpTo(Login.route) { inclusive = true }
+                                            }
+                                        } else {
+                                            errorMessage = "Failed to set user role"
+                                        }
+                                    }
+                                }
+                            } else {
+                                errorMessage = message ?: "Registration failed"
+                            }
+                        }
+                    }
                 }) {
                     Text(text = "Homeowner Sign Up")
                 }
 
-                Button(onClick = { /* Handle Cleaner Sign Up */
-                    // get to Handle Cleaner Screen
+                Button(onClick = {
+                    if (isEmailValid && isPhoneNumberValid && isPasswordValid && isRepeatPasswordValid) {
+                        firebaseHelper.registerUser(email, password) { success, message ->
+                            if (success) {
+                                val user = firebaseHelper.auth.currentUser
+                                user?.let {
+                                    firebaseHelper.setUserRole(it.uid, "Cleaner") { roleSuccess ->
+                                        if (roleSuccess) {
+                                            navController.navigate(Login.route) {
+                                                popUpTo(Login.route) { inclusive = true }
+                                            }
+                                        } else {
+                                            errorMessage = "Failed to set user role"
+                                        }
+                                    }
+                                }
+                            } else {
+                                errorMessage = message ?: "Registration failed"
+                            }
+                        }
+                    }
                 }) {
                     Text(text = "Cleaner Sign Up")
                 }
@@ -138,15 +207,13 @@ fun SignUpScreen(navController: NavController) {
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = { /* Handle Google Sign Up */
-                //TODO need analyze for an alert dialog chosing
+                    //TODO need analyze for an alert dialog choosing
                 }) {
                     Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = null, modifier = Modifier.size(40.dp))
                 }
                 IconButton(onClick = { /* Handle Facebook Sign Up */
-
-                    //TODO need analyze for an alert dialog chosing
+                    //TODO need analyze for an alert dialog choosing
                 }) {
-
                     Icon(painter = painterResource(id = R.drawable.ic_facebook), contentDescription = null, modifier = Modifier.size(40.dp))
                 }
             }
@@ -155,6 +222,11 @@ fun SignUpScreen(navController: NavController) {
 
             TextButton(onClick = { navController.navigate(Login.route) }) {
                 Text(text = "Already have an account? Login")
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = errorMessage, color = Color.Red, fontSize = 12.sp)
             }
         }
     }

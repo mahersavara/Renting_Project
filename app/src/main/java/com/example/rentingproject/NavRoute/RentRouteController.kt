@@ -3,6 +3,11 @@ package com.example.rentingproject.NavRoute
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -29,15 +34,34 @@ import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.ServiceDeta
 import com.example.rentingproject.ui.ListScreen.IntroduceScreen.IntroduceScreen
 import com.example.rentingproject.ui.ListScreen.Account.LoginScreen.LoginScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
-import com.example.rentingproject.ui.ListScreen.RegisterScreen.SignUpScreen
+import com.example.rentingproject.ui.ListScreen.Account.RegisterScreen.SignUpScreen
 import com.example.rentingproject.ui.ListScreen.SplashScreen.SplashScreen
 import com.example.rentingproject.utils.DataStoreHelper
+import com.example.rentingproject.utils.FirebaseHelper
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStoreHelper) {
     val navController = rememberNavController()
+    val firebaseHelper = FirebaseHelper()
+    var userRole by remember { mutableStateOf<String?>(null) }
+
+
+    LaunchedEffect(firebaseHelper.auth.currentUser) {
+        firebaseHelper.auth.currentUser?.let { user ->
+            firebaseHelper.getUserRole(user.uid) { role ->
+                userRole = role
+                navController.navigate(if (role == "Cleaner") CleanerHome.route else HomeOwnerHome.route) {
+                    popUpTo(SplashScreen.route) { inclusive = true }
+                }
+            }
+        } ?: run {
+            navController.navigate(SplashScreen.route)
+        }
+    }
+
+
     NavHost(navController = navController, startDestination = SplashScreen.route) {
         composable(SplashScreen.route) { SplashScreen(navController, dataStoreHelper) }
         composable(IntroduceScreen.route) {

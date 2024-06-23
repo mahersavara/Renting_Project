@@ -1,33 +1,11 @@
 package com.example.rentingproject.ui.ListScreen.Account.LoginScreen
 
-
-// viet ui nhung chi implement happy case
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,20 +16,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.rentingproject.NavRoute.BookingCalendar
-import com.example.rentingproject.NavRoute.CleanerHome
-import com.example.rentingproject.NavRoute.HomeOwnerHome
-import com.example.rentingproject.NavRoute.SignUp
+import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
+import com.example.rentingproject.utils.FirebaseHelper
 
 @Composable
-fun LoginScreen(navController: NavController, modifier: Modifier= Modifier) {
+fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
+
     var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isEmailOrPhoneValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
     var passwordVisibility by remember { mutableStateOf(false) }
     var rememberPassword by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val firebaseHelper = FirebaseHelper()
 
     Box(
         modifier = Modifier
@@ -92,7 +72,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier= Modifier) {
                 value = emailOrPhone,
                 onValueChange = {
                     emailOrPhone = it
-                    isEmailOrPhoneValid = it.isNotEmpty() // Simplified validation
+                    isEmailOrPhoneValid = it.isNotEmpty()
                 },
                 label = { Text("Email/phone number") },
                 isError = !isEmailOrPhoneValid,
@@ -109,7 +89,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier= Modifier) {
                 value = password,
                 onValueChange = {
                     password = it
-                    isPasswordValid = it.isNotEmpty() // Simplified validation
+                    isPasswordValid = it.isNotEmpty()
                 },
                 label = { Text("Password") },
                 isError = !isPasswordValid,
@@ -152,8 +132,21 @@ fun LoginScreen(navController: NavController, modifier: Modifier= Modifier) {
             Button(
                 onClick = {
                     if (isEmailOrPhoneValid && isPasswordValid) {
-                        //TODO Perform login
-                        navController.navigate(CleanerHome.route)
+                        firebaseHelper.auth.signInWithEmailAndPassword(emailOrPhone, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val user = firebaseHelper.auth.currentUser
+                                    user?.let {
+                                        firebaseHelper.getUserRole(it.uid) { role ->
+                                            navController.navigate(if (role == "Cleaner") CleanerHome.route else HomeOwnerHome.route) {
+                                                popUpTo(Login.route) { inclusive = true }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    errorMessage = task.exception?.message ?: "Login failed"
+                                }
+                            }
                     } else {
                         if (!isEmailOrPhoneValid) isEmailOrPhoneValid = false
                         if (!isPasswordValid) isPasswordValid = false
@@ -162,6 +155,10 @@ fun LoginScreen(navController: NavController, modifier: Modifier= Modifier) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Log in")
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
