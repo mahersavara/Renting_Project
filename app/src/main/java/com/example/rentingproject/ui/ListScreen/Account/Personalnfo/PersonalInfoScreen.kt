@@ -61,7 +61,8 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                 profilePictureUri = it
                 Toast.makeText(context, "Image uploaded successfully", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Image size should be less than 1MB", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Image size should be less than 1MB", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -77,7 +78,8 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                         phoneNumber = document.getString("phoneNumber") ?: ""
                         gender = document.getString("gender") ?: ""
                         birthday = document.getString("birthday") ?: ""
-                        profilePictureUri = document.getString("profilePicture")?.let { Uri.parse(it) }
+                        profilePictureUri =
+                            document.getString("profilePicture")?.let { Uri.parse(it) }
                     } else {
                         Timber.tag("PersonalInfoScreen").d("No such document")
                     }
@@ -106,7 +108,10 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                 title = { Text("Personal Info") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
@@ -181,7 +186,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             ) {
                 OutlinedTextField(
                     value = gender,
-                    onValueChange = { gender = it},
+                    onValueChange = { gender = it },
                     label = { Text("Gender") },
                     readOnly = true,
                     trailingIcon = {
@@ -189,7 +194,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .clickable { expanded = !expanded }
+                        .menuAnchor()
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -208,19 +213,22 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = birthday,
-                onValueChange = { },
-                label = { Text("Birthday") },
-                modifier = Modifier.fillMaxWidth(),
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { dialogState.show() }) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .clickable { dialogState.show() }
+            ) {
+                OutlinedTextField(
+                    value = birthday,
+                    onValueChange = { },
+                    label = { Text("Birthday") },
+                    readOnly = true,
+                    trailingIcon = {
                         Icon(painter = painterResource(id = R.drawable.ic_booking), contentDescription = "Select Date")
-                    }
-                }
-            )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -238,20 +246,37 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                         .addOnSuccessListener {
                             Timber.tag("PersonalInfoScreen").d("User profile updated")
                             if (profilePictureUri != null) {
-                                firebaseHelper.uploadProfilePicture(user.uid, profilePictureUri!!) { uri ->
+                                firebaseHelper.uploadProfilePicture(
+                                    user.uid,
+                                    profilePictureUri!!
+                                ) { uri ->
                                     if (uri != null) {
-                                        Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Profile updated successfully",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } else {
-                                        Toast.makeText(context, "Failed to upload profile picture", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Failed to upload profile picture",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
                             } else {
-                                Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Profile updated successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                         .addOnFailureListener { exception ->
-                            Timber.tag("PersonalInfoScreen").e(exception, "Failed to update profile")
-                            Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                            Timber.tag("PersonalInfoScreen")
+                                .e(exception, "Failed to update profile")
+                            Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT)
+                                .show()
                         }
                 }
             }, modifier = Modifier.fillMaxWidth()) {
@@ -291,6 +316,7 @@ fun CountryCodePicker(selectedCountryCode: String, onCountryCodeSelected: (Strin
             modifier = Modifier
                 .width(100.dp)
                 .clickable { expanded = !expanded }
+                .menuAnchor()
         )
         ExposedDropdownMenu(
             expanded = expanded,
