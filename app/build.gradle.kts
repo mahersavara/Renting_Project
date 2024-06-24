@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -95,6 +96,7 @@ dependencies {
 
 
     // Coil -> Load ảnh
+    implementation(libs.coil.compose.v210)
 
 
     // Navigation
@@ -121,6 +123,16 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+
+    implementation (libs.firebase.firestore.ktx)
+
+    // datetime dialog =))
+    implementation (libs.compose.material.dialogs.core)
+    implementation (libs.datetime)
+    //  implementation "io.github.vanpra.compose-material-dialogs:color:${version}"
+    // phonenumber lib
+    implementation (libs.libphonenumber)
+
 
 }
 

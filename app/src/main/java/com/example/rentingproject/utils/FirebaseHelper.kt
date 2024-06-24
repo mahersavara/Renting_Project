@@ -1,5 +1,6 @@
 package com.example.rentingproject.utils
 
+import android.net.Uri
 import android.util.Log
 import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.Listing
 import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.Request
@@ -7,12 +8,14 @@ import com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen.Service
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class FirebaseHelper {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val storage: FirebaseStorage = FirebaseStorage.getInstance()
 
 
     init {
@@ -53,7 +56,7 @@ class FirebaseHelper {
                     Timber.tag("FirebaseHelper").d("Fetched user role: %s", role)
                     onComplete(role)
                 } else {
-                    Timber.tag("FirebaseHelper").d("Fetched user role: null")
+                    Timber.tag("FirebaseHelper").d("Fetched user role: document null")
                     onComplete(null)
                 }
             }
@@ -119,6 +122,26 @@ class FirebaseHelper {
         } catch (e: Exception) {
             emptyList()
         }
+    }
+
+
+    fun uploadProfilePicture(uid: String, uri: Uri, onComplete: (String?) -> Unit) {
+        val ref = storage.reference.child("profile_pictures/$uid.jpg")
+        ref.putFile(uri)
+            .addOnSuccessListener {
+                ref.downloadUrl.addOnSuccessListener { downloadUri ->
+                    db.collection("users").document(uid).update("profilePicture", downloadUri.toString())
+                        .addOnSuccessListener {
+                            onComplete(downloadUri.toString())
+                        }
+                        .addOnFailureListener {
+                            onComplete(null)
+                        }
+                }
+            }
+            .addOnFailureListener {
+                onComplete(null)
+            }
     }
 
 }

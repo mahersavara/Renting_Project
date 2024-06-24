@@ -1,6 +1,8 @@
 [versions]
 accompanistPager = "0.24.13-rc"
 agp = "8.5.0"
+coilCompose = "2.1.0"
+core = "0.9.0"
 datastorePreferences = "1.1.1"
 firebaseAuth = "23.0.0"
 firebaseBom = "33.1.1"
@@ -12,6 +14,7 @@ coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+libphonenumber = "8.12.19"
 lifecycleRuntimeKtx = "2.8.0"
 activityCompose = "1.9.0"
 composeBom = "2023.08.00"
@@ -33,15 +36,21 @@ navigation = "2.7.7"
 navigation-hilt = "1.2.0"
 room = "2.6.1"
 timber = "5.0.1"
+firebaseStorageKtx = "21.0.0"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+coil-compose-v210 = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+compose-material-dialogs-core = { module = "io.github.vanpra.compose-material-dialogs:core", version.ref = "core" }
+core = { module = "io.github.vanpra.compose-material-dialogs:core" }
+datetime = { module = "io.github.vanpra.compose-material-dialogs:datetime", version.ref = "core" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -64,12 +73,14 @@ coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
 navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 navigation-hilt = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "navigation-hilt" }
 room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
