@@ -8,6 +8,7 @@ import com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen.Service
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -91,9 +92,14 @@ class FirebaseHelper {
         }
     }
 
-    suspend fun getPopularServices(): List<Service> {
+    suspend fun getPopularServices(lastVisible: QuerySnapshot? = null): List<Service> {
         return try {
-            val snapshot = db.collection("services").orderBy("popularity").limit(10).get().await()
+            val query = db.collection("services")
+                .orderBy("popularity")
+                .limit(10)
+            val snapshot = lastVisible?.let {
+                query.startAfter(it.documents.lastOrNull()).get().await()
+            } ?: query.get().await()
             snapshot.documents.mapNotNull { document ->
                 document.toObject(Service::class.java)
             }
@@ -101,6 +107,7 @@ class FirebaseHelper {
             emptyList()
         }
     }
+
 
     suspend fun getListings(uid: String): List<Listing> {
         return try {
@@ -143,5 +150,7 @@ class FirebaseHelper {
                 onComplete(null)
             }
     }
+
+
 
 }
