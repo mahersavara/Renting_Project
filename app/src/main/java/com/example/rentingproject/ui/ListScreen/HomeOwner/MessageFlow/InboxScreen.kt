@@ -21,19 +21,19 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rentingproject.R
-import com.example.rentingproject.database.model.Message
+import com.example.rentingproject.database.model.message.Message
+import com.example.rentingproject.utils.FirebaseHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = Modifier) {
-    // Dummy data for messages
-    val messages = listOf(
-        Message(1, "Esther Howard", "Lorem ipsum dolor sit amet consectetur.", "1 hrs ago", true, R.drawable.dummy_profile),
-        Message(2, "Me", "Lorem ipsum dolor sit amet consectetur.", "1 hrs ago", true, R.drawable.dummy_profile)
-        // Add more messages as needed
-    )
-
+    val firebaseHelper = FirebaseHelper()
+    var messages by remember { mutableStateOf(listOf<Message>()) }
     var messageText by remember { mutableStateOf("") }
+
+    LaunchedEffect(userId) {
+        messages = firebaseHelper.getMessagesForConversation(userId)
+    }
 
     Box(
         modifier = Modifier
@@ -48,7 +48,7 @@ fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopAppBar(
-                title = { Text("Soeur Emmanuelle") },
+                title = { Text("Conversation") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
@@ -86,12 +86,16 @@ fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = 
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(
                         onSend = {
-                            // Handle send message
+                            firebaseHelper.sendMessage(userId, messageText)
+                            messageText = ""
                         }
                     )
                 )
 
-                IconButton(onClick = { /* Handle send message */ }) {
+                IconButton(onClick = {
+                    firebaseHelper.sendMessage(userId, messageText)
+                    messageText = ""
+                }) {
                     Icon(Icons.Filled.Send, contentDescription = "Send")
                 }
             }

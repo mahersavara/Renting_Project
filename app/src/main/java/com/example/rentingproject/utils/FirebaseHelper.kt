@@ -1,14 +1,16 @@
 package com.example.rentingproject.utils
 
 import android.net.Uri
-import android.util.Log
+import com.example.rentingproject.database.model.message.InboxItem
+import com.example.rentingproject.database.model.message.Message
+import com.example.rentingproject.database.model.servicejob.Review
 import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.Listing
 import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.Request
 import com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen.Service
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -88,17 +90,37 @@ class FirebaseHelper {
             val document = db.collection("addresses").document(uid).get().await()
             document.getString("address") ?: ""
         } catch (e: Exception) {
+            Timber.tag("FirebaseHelper").e(e, "Error fetching user address")
             ""
         }
     }
 
-    suspend fun getPopularServices(lastVisible: QuerySnapshot? = null): List<Service> {
+    suspend fun getServices(lastVisibleService: DocumentSnapshot?): List<Service> {
         return try {
-            val query = db.collection("services")
-                .orderBy("popularity")
-                .limit(10)
-            val snapshot = lastVisible?.let {
-                query.startAfter(it.documents.lastOrNull()).get().await()
+            val query = if (lastVisibleService == null) {
+                db.collection("services").limit(10)
+            } else {
+                db.collection("services").startAfter(lastVisibleService).limit(10)
+            }
+            val snapshot = query.get().await()
+            snapshot.documents.mapNotNull { document ->
+                document.toObject(Service::class.java)?.copy(snapshot = document)
+            }
+        } catch (e: Exception) {
+            Timber.tag("FirebaseHelper").e(e, "Error fetching services")
+            emptyList()
+        }
+    }
+
+
+
+
+
+    suspend fun getPopularServices(lastVisibleService: DocumentSnapshot? = null): List<Service> {
+        return try {
+            val query = db.collection("services").orderBy("popularity").limit(10)
+            val snapshot = lastVisibleService?.let {
+                query.startAfter(it).get().await()
             } ?: query.get().await()
             snapshot.documents.mapNotNull { document ->
                 document.toObject(Service::class.java)
@@ -116,6 +138,7 @@ class FirebaseHelper {
                 document.toObject(Listing::class.java)
             }
         } catch (e: Exception) {
+            Timber.tag("FirebaseHelper").e(e, "Error fetching listings")
             emptyList()
         }
     }
@@ -150,6 +173,61 @@ class FirebaseHelper {
                 onComplete(null)
             }
     }
+
+
+    suspend fun getInboxItems(uid: String): List<InboxItem> {
+        return try {
+            val snapshot = db.collection("inbox").whereEqualTo("userId", uid).get().await()
+            snapshot.documents.mapNotNull { document ->
+                document.toObject(InboxItem::class.java)
+            }
+        } catch (e: Exception) {
+            Timber.tag("FirebaseHelper").e(e, "Error fetching inbox items")
+            emptyList()
+        }
+    }
+
+    suspend fun getMessagesForConversation(conversationId: Int): List<Message> {
+        return try {
+            val snapshot = db.collection("messages").whereEqualTo("conversationId", conversationId).get().await()
+            snapshot.documents.mapNotNull { document ->
+                document.toObject(Message::class.java)
+            }
+        } catch (e: Exception) {
+            Timber.tag("FirebaseHelper").e(e, "Error fetching messages")
+            emptyList()
+        }
+    }
+
+    fun markMessageAsRead(conversationId: Int) {
+        db.collection("inbox").document(conversationId.toString()).update("isRead", true)
+            .addOnSuccessListener {
+                Timber.tag("FirebaseHelper").d("Message marked as read")
+            }
+            .addOnFailureListener { exception ->
+                Timber.tag("FirebaseHelper").e(exception, "Error marking message as read")
+            }
+    }
+
+    fun sendMessage(conversationId: Int, content: String) {
+        val newMessage = hashMapOf(
+            "conversationId" to conversationId,
+            "sender" to "Me",
+            "content" to content,
+            "timestamp" to System.currentTimeMillis(),
+            "isRead" to false
+        )
+
+        db.collection("messages").add(newMessage)
+            .addOnSuccessListener {
+                db.collection("inbox").document(conversationId.toString()).update("lastMessage", content, "isRead", false)
+                Timber.tag("FirebaseHelper").d("Message sent successfully")
+            }
+            .addOnFailureListener { exception ->
+                Timber.tag("FirebaseHelper").e(exception, "Error sending message")
+            }
+    }
+
 
 
 

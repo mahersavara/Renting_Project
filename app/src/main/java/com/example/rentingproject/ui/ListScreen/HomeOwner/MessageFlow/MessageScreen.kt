@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,18 +19,19 @@ import androidx.navigation.NavController
 import com.example.rentingproject.NavRoute.Inbox
 import com.example.rentingproject.NavRoute.Message
 import com.example.rentingproject.R
-import com.example.rentingproject.database.model.InboxItem
+import com.example.rentingproject.database.model.message.InboxItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.utils.FirebaseHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageScreen(navController: NavController, modifier: Modifier = Modifier) {
-    val inboxItems = listOf(
-        // Add dummy data here for testing
-        InboxItem(1, "Soeur Emmanuelle", "Lorem ipsum dolor sit amet", "1 hrs ago", false, R.drawable.dummy_profile),
-        InboxItem(2, "Darby", "Lorem ipsum dolor sit amet", "1 hrs ago", false, R.drawable.dummy_profile),
-        // Add more items as needed
-    )
+    val firebaseHelper = FirebaseHelper()
+    var inboxItems by remember { mutableStateOf(listOf<InboxItem>()) }
+
+    LaunchedEffect(Unit) {
+        inboxItems = firebaseHelper.getInboxItems(firebaseHelper.auth.currentUser?.uid.orEmpty())
+    }
 
     Box(
         modifier = Modifier
@@ -48,7 +49,7 @@ fun MessageScreen(navController: NavController, modifier: Modifier = Modifier) {
                 title = { Text("Message") },
                 actions = {
                     IconButton(onClick = { /* Handle delete action */ }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_cart), contentDescription = "Delete")
+                        Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = "Delete")
                     }
                 }
             )
@@ -60,24 +61,28 @@ fun MessageScreen(navController: NavController, modifier: Modifier = Modifier) {
             ) {
                 items(inboxItems.size) { index ->
                     val item = inboxItems[index]
-                    InboxItemView(item, navController)
+                    InboxItemView(item, navController, firebaseHelper)
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            BottomNavigationBar(navController = navController, currentRoute = Message.route)
+            BottomNavigationBar(navController = navController, currentRoute = Message.route, userRole = "HomeOwner") // Assume "HomeOwner" as default role for bottom navigation
         }
     }
 }
 
 @Composable
-fun InboxItemView(item: InboxItem, navController: NavController) {
+fun InboxItemView(item: InboxItem, navController: NavController, firebaseHelper: FirebaseHelper) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { 
-                //TODO Navigate to InboxScreen
+            .clickable {
+                // Mark message as read
+                if (!item.isRead) {
+                    firebaseHelper.markMessageAsRead(item.id)
+                }
+                // Navigate to InboxScreen
                 navController.navigate(Inbox.createRoute(item.id))
             },
         verticalAlignment = Alignment.CenterVertically
