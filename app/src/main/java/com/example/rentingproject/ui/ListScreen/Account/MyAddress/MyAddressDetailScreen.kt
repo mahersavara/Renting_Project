@@ -1,42 +1,39 @@
 package com.example.rentingproject.ui.ListScreen.Account.MyAddress
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rentingproject.R
+import com.example.rentingproject.database.model.address.Address
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyAddressDetailScreen(navController: NavController, modifier: Modifier = Modifier) {
-    var name by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
+fun MyAddressDetailScreen(navController: NavController, addressId: String, modifier: Modifier = Modifier) {
+    val firebaseHelper = FirebaseHelper()
+    val coroutineScope = rememberCoroutineScope()
+    var address by remember { mutableStateOf(Address()) }
     var isDefaultAddress by remember { mutableStateOf(false) }
+
+    LaunchedEffect(addressId) {
+        if (addressId != "new") {
+            coroutineScope.launch {
+                val fetchedAddress = firebaseHelper.getAddressById(addressId)
+                if (fetchedAddress != null) {
+                    address = fetchedAddress
+                    isDefaultAddress = fetchedAddress.isDefault
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -50,7 +47,29 @@ fun MyAddressDetailScreen(navController: NavController, modifier: Modifier = Mod
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* Save address action */ }) {
+            FloatingActionButton(onClick = {
+                coroutineScope.launch {
+                    val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+                    if (isDefaultAddress) {
+                        val addresses = firebaseHelper.getUserAddresses(uid)
+                        addresses.forEach { it.isDefault = false }
+                        firebaseHelper.updateAddresses(addresses)
+                    }
+                    if (addressId == "new") {
+                        firebaseHelper.addAddress(uid, address.copy(isDefault = isDefaultAddress)) { success ->
+                            if (success) {
+                                navController.popBackStack()
+                            }
+                        }
+                    } else {
+                        firebaseHelper.updateAddress(address.copy(isDefault = isDefaultAddress)) { success ->
+                            if (success) {
+                                navController.popBackStack()
+                            }
+                        }
+                    }
+                }
+            }) {
                 Icon(painter = painterResource(id = R.drawable.ic_check), contentDescription = "Save Address")
             }
         }
@@ -61,8 +80,8 @@ fun MyAddressDetailScreen(navController: NavController, modifier: Modifier = Mod
                 .padding(16.dp)
         ) {
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = address.name,
+                onValueChange = { address = address.copy(name = it) },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -70,8 +89,8 @@ fun MyAddressDetailScreen(navController: NavController, modifier: Modifier = Mod
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                value = address.phoneNumber,
+                onValueChange = { address = address.copy(phoneNumber = it) },
                 label = { Text("Phone number") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
@@ -82,8 +101,8 @@ fun MyAddressDetailScreen(navController: NavController, modifier: Modifier = Mod
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
+                value = address.street,
+                onValueChange = { address = address.copy(street = it) },
                 label = { Text("Location") },
                 modifier = Modifier.fillMaxWidth()
             )

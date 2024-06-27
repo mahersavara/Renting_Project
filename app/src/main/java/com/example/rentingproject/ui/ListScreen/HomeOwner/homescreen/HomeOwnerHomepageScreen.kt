@@ -1,30 +1,38 @@
 package com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
-import com.example.rentingproject.ui.components.BottomNavItem
+import com.example.rentingproject.database.model.job.Service
+import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceCard
 import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.utils.FirebaseHelper
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.DocumentSnapshot
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -33,27 +41,73 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
     val userRole = "HomeOwner"
     val firebaseHelper = FirebaseHelper()
     var address by remember { mutableStateOf("") }
-    var popularServices by remember { mutableStateOf(listOf<Service>()) }
-    var lastVisibleService by remember { mutableStateOf<QuerySnapshot?>(null) }
+    var allServices by remember { mutableStateOf(listOf<Service>()) }
+    var filteredServices by remember { mutableStateOf(listOf<Service>()) }
+    var lastVisibleService by remember { mutableStateOf<DocumentSnapshot?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    var searchQuery by remember { mutableStateOf("") }
+    var searchJob: Job? by remember { mutableStateOf(null) }
+    val context = LocalContext.current
 
-
+    val listState = rememberLazyListState()
 
     fun loadMoreServices() {
         coroutineScope.launch {
-            if (!isLoading) {
-                isLoading = true
-                val newServices = firebaseHelper.getPopularServices(lastVisibleService)
-                popularServices = popularServices + newServices
-                isLoading = false
+            isLoading = true
+            val newServicesWithSnapshots = firebaseHelper.getMoreServices(lastVisibleService)
+            val newServices = newServicesWithSnapshots.map { it.first }
+            if (newServices.isNotEmpty()) {
+                allServices = allServices + newServices
+                filteredServices = allServices
+                lastVisibleService = newServicesWithSnapshots.last().second
+            } else {
+                Toast.makeText(context, "That's all items", Toast.LENGTH_SHORT).show()
             }
+            isLoading = false
+        }
+    }
+
+    fun fetchData() {
+        coroutineScope.launch {
+            val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+            val addresses = firebaseHelper.getUserAddresses(uid)
+            val defaultAddress = addresses.find { it.isDefault }
+            address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "No default address set"
+            loadMoreServices()
         }
     }
 
     LaunchedEffect(Unit) {
-        address = firebaseHelper.getUserAddress(firebaseHelper.auth.currentUser?.uid.orEmpty())
-        loadMoreServices()
+        fetchData()
+    }
+
+    LaunchedEffect(searchQuery) {
+        searchJob?.cancel()
+        searchJob = coroutineScope.launch {
+            delay(500)
+            if (searchQuery.isEmpty()) {
+                filteredServices = allServices
+            } else {
+                filteredServices = allServices.filter { service ->
+                    service.name.contains(searchQuery, ignoreCase = true)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo }
+            .map { visibleItems ->
+                val lastVisibleItemIndex = visibleItems.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex to listState.firstVisibleItemIndex
+            }
+            .distinctUntilChanged()
+            .collect { (lastVisibleItemIndex, firstVisibleItemIndex) ->
+                if (!isLoading && lastVisibleItemIndex >= filteredServices.size - 1 && firstVisibleItemIndex > 0) {
+                    loadMoreServices()
+                }
+            }
     }
 
     Scaffold(
@@ -93,8 +147,8 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
 
             // Search Bar
             OutlinedTextField(
-                value = "",
-                onValueChange = { /* Handle Search Input */ },
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
                 label = { Text("Search") },
                 leadingIcon = {
                     Icon(
@@ -102,97 +156,35 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                         contentDescription = "Search"
                     )
                 },
-                trailingIcon = {
-                    IconButton(onClick = { /* Handle Filter */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_filter),
-                            contentDescription = "Filter"
-                        )
-                    }
-                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
 
-            // Most Popular Section
+            // Services Section
             Text(
-                text = "Most popular",
+                text = "Available Services",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                itemsIndexed(popularServices) { index, service ->
-                    if (index == popularServices.size - 1 && !isLoading) {
-                        loadMoreServices()
+            if (isLoading && allServices.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    // ! todo not tested with >=10 function.
+                    itemsIndexed(filteredServices) { index, service ->
+                        ServiceCard(navController = navController, service = service)
                     }
-                    CleanerCard(navController = navController, service = service)
                 }
             }
         }
     }
 }
 
-@Composable
-fun CleanerCard(navController: NavController, service: Service) {
-    var isLiked by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier
-            .width(160.dp)
-            .height(240.dp)
-            .clickable { navController.navigate(ServiceDetail.createRoute(service.name)) },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual service image
-                contentDescription = "Service Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = service.name, style = MaterialTheme.typography.bodyMedium)
-            Text(text = service.location, style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.weight(1f))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "\$${service.price}", style = MaterialTheme.typography.bodyMedium)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = "Rating",
-                        tint = Color.Yellow
-                    )
-                    Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-            IconButton(onClick = { isLiked = !isLiked }) {
-                Icon(
-                    painter = painterResource(id = if (isLiked) R.drawable.ic_liked else R.drawable.ic_like),
-                    contentDescription = "Like Button"
-                )
-            }
-        }
-    }
-}
-
-data class Service(
-    val name: String,
-    val location: String,
-    val price: String,
-    val rating: Double
-)

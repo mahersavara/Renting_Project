@@ -1,10 +1,11 @@
 package com.example.rentingproject.database.model.message
 
 data class Message(
-    val id: Int = 0,
+    val conversationId: String = "",
     val sender: String = "",
     val content: String = "",
-    val timestamp: String = "",
+    var timestamp: Long = 0L, // Use Long for timestamp
     val isRead: Boolean = false,
-    val avatar: Int = 0
+    val avatarUrl: String = "", // URL for the user's avatar image
+    val participants: List<String> = listOf()
 )

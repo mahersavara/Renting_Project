@@ -19,7 +19,6 @@ import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressDetai
 import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressScreen
 import com.example.rentingproject.ui.ListScreen.Account.Payment.PaymentMethodScreen
 import com.example.rentingproject.ui.ListScreen.Account.Personalnfo.PersonalInfoScreen
-import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.CleanerHomePage
 import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.AllJobsScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.EditJobScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.PostJobScreen
@@ -35,6 +34,11 @@ import com.example.rentingproject.ui.ListScreen.IntroduceScreen.IntroduceScreen
 import com.example.rentingproject.ui.ListScreen.Account.LoginScreen.LoginScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
 import com.example.rentingproject.ui.ListScreen.Account.RegisterScreen.SignUpScreen
+import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.CleanerHomePage
+import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.ChooseDateScreen
+import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.DeliveryAddressScreen
+import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.OrderSuccessScreen
+import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.PaymentScreen
 import com.example.rentingproject.ui.ListScreen.SplashScreen.SplashScreen
 import com.example.rentingproject.utils.DataStoreHelper
 import com.example.rentingproject.utils.FirebaseHelper
@@ -76,19 +80,31 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
         composable(PersonalInfo.route) { PersonalInfoScreen(navController = navController) }
         composable(
             route = Inbox.route,
-            arguments = listOf(navArgument(Inbox.userIdArg) { type = NavType.IntType })
+            arguments = listOf(
+                navArgument(Inbox.conversationIdArg) { type = NavType.StringType },
+                navArgument(Inbox.participantsArg) { type = NavType.StringType }
+            )
         ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getInt(Inbox.userIdArg) ?: 0
-            InboxScreen(navController = navController, userId = userId)
+            val conversationId = backStackEntry.arguments?.getString(Inbox.conversationIdArg) ?: ""
+            val participantsStr = backStackEntry.arguments?.getString(Inbox.participantsArg) ?: ""
+            val participants = participantsStr.split(",")
+
+            InboxScreen(navController = navController, conversationId = conversationId, participants = participants)
         }
 
-        composable(MyAddress.route) {
-            MyAddressScreen(navController = navController)
+
+        composable(MyAddress.route) { MyAddressScreen(navController = navController) }
+        composable(
+            route = "${MyAddressDetail.route}/{addressId}",
+            arguments = listOf(navArgument("addressId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val addressId = backStackEntry.arguments?.getString("addressId") ?: "new"
+            MyAddressDetailScreen(navController = navController, addressId = addressId)
         }
-        composable(MyAddressDetail.route) {
-            MyAddressDetailScreen(navController)
-        }
+
         // change payment method
+
+
         composable(payment.route) {
             PaymentMethodScreen(navController)
         }
@@ -106,11 +122,12 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
         }
 
         // ! Same name ( package/class ) with keyword leading to fail the code leading to java.lang.NoClassDefFoundError: Failed resolution of:
-        composable(ServiceDetail.route,
-            arguments = listOf(navArgument(ServiceDetail.serviceNameArg) { type = NavType.StringType })
+        composable(
+            route = ServiceDetail.route,
+            arguments = listOf(navArgument(ServiceDetail.serviceIdArg) { type = NavType.StringType })
         ) { backStackEntry ->
-            val serviceName = backStackEntry.arguments?.getString(ServiceDetail.serviceNameArg) ?: ""
-            ServiceDetailScreen(navController = navController, serviceName = serviceName)
+            val serviceId = backStackEntry.arguments?.getString(ServiceDetail.serviceIdArg) ?: ""
+            ServiceDetailScreen(navController, serviceId)
         }
         composable(Liked.route){
             LikedServiceScreen(navController)
@@ -135,11 +152,56 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
         composable(PostJob.route) { PostJobScreen(navController = navController) }
         composable(
             route = EditJob.route,
-            arguments = listOf(navArgument(EditJob.serviceNameArg) { type = NavType.StringType })
+            arguments = listOf(navArgument(EditJob.serviceIdArg) { type = NavType.StringType })
         ) { backStackEntry ->
-            val serviceName = backStackEntry.arguments?.getString(EditJob.serviceNameArg) ?: ""
-            EditJobScreen(navController = navController, serviceName = serviceName)
+            val serviceId = backStackEntry.arguments?.getString(EditJob.serviceIdArg) ?: ""
+            EditJobScreen(navController = navController, serviceId = serviceId)
         }
+
+
+        //TODO book section
+        composable(
+            route = ChooseDate.route,
+            arguments = listOf(navArgument(ChooseDate.serviceIdArg) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString(ChooseDate.serviceIdArg) ?: ""
+            ChooseDateScreen(navController = navController, serviceId = serviceId)
+        }
+
+
+        composable(
+            route = DeliveryAddress.route,
+            arguments = listOf(
+                navArgument(DeliveryAddress.serviceIdArg) { type = NavType.StringType },
+                navArgument(DeliveryAddress.dateArg) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString(DeliveryAddress.serviceIdArg) ?: ""
+            val date = backStackEntry.arguments?.getString(DeliveryAddress.dateArg) ?: ""
+            DeliveryAddressScreen(navController = navController, serviceId = serviceId, date = date)
+        }
+
+        composable(
+            route = PaymentBooking.route,
+            arguments = listOf(
+                navArgument(PaymentBooking.serviceIdArg) { type = NavType.StringType },
+                navArgument(PaymentBooking.dateArg) { type = NavType.StringType },
+                navArgument(PaymentBooking.addressArg) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString(PaymentBooking.serviceIdArg) ?: ""
+            val date = backStackEntry.arguments?.getString(PaymentBooking.dateArg) ?: ""
+            val address = backStackEntry.arguments?.getString(PaymentBooking.addressArg) ?: ""
+            PaymentScreen(navController = navController, serviceId = serviceId, date = date, address = address)
+        }
+
+
+        composable(
+            route = OrderSuccess.route
+        ) {
+            OrderSuccessScreen(navController = navController)
+        }
+
 
     }
 

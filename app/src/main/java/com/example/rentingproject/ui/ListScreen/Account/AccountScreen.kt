@@ -127,19 +127,21 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (userRole == "HomeOwner") {
-                ListItem("Transaction history", id = R.drawable.ic_trans_history)
+                ListItem("Transaction history", id = R.drawable.ic_trans_history, navController = navController)
             }
 
-            ListItem("Privacy & Security", id = R.drawable.ic_privacy)
-            ListItem("Payment Method", id = R.drawable.ic_payment_method)
-            ListItem("Address", id = R.drawable.ic_address)
+            ListItem("Privacy & Security", id = R.drawable.ic_privacy, navController = navController)
+            ListItem("Payment Method", id = R.drawable.ic_payment_method, navController = navController, route = payment.route)
+            ListItem("Address", id = R.drawable.ic_address, navController = navController, route = MyAddress.route)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    /* Handle Logout */
-                    navController.navigate(Login.route)
+                    firebaseHelper.auth.signOut()
+                    navController.navigate(Login.route) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -153,12 +155,16 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ListItem(text: String, @DrawableRes id: Int) {
+fun ListItem(text: String, @DrawableRes id: Int, navController: NavController, route: String? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { /* Handle item click */ },
+            .clickable {
+                route?.let {
+                    navController.navigate(it)
+                }
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text, modifier = Modifier.weight(1f), fontSize = 16.sp)

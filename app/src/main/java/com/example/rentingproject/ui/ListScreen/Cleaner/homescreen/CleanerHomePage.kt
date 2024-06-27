@@ -15,29 +15,63 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
-import com.example.rentingproject.ui.components.BottomNavItem
+import com.example.rentingproject.database.model.Order
+import com.example.rentingproject.database.model.job.Service
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.ui.components.ServiceCard
 import com.example.rentingproject.utils.FirebaseHelper
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = CleanerHome.route
     val userRole = "Cleaner"
     val firebaseHelper = FirebaseHelper()
     var address by remember { mutableStateOf("") }
-    var requests by remember { mutableStateOf(listOf<Request>()) }
-    var listings by remember { mutableStateOf(listOf<Listing>()) }
+    var pendingOrders by remember { mutableStateOf(listOf<Order>()) }
+    var services by remember { mutableStateOf(listOf<Service>()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+
+    fun fetchData() {
+        coroutineScope.launch {
+            val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+            val addresses = firebaseHelper.getUserAddresses(uid)
+            val defaultAddress = addresses.find { it.isDefault }
+            address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "No default address set"
+            pendingOrders = firebaseHelper.getPendingOrdersForCleaner(uid)
+            services = firebaseHelper.getServices(uid)
+            isLoading = false
+        }
+    }
+
+    fun handleOrderAction(orderId: String, status: String) {
+        coroutineScope.launch {
+            firebaseHelper.updateOrderStatus(orderId, status) { success ->
+                if (success) {
+                    fetchData() // refresh data after update
+                } else {
+                    // handle error
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
-        address = firebaseHelper.getUserAddress(firebaseHelper.auth.currentUser?.uid.orEmpty())
-        requests = firebaseHelper.getRequests(firebaseHelper.auth.currentUser?.uid.orEmpty())
-        listings = firebaseHelper.getListings(firebaseHelper.auth.currentUser?.uid.orEmpty())
+        fetchData()
+    }
+
+    // Add this to refetch data when coming back to the screen
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        if (destination.route == CleanerHome.route) {
+            fetchData()
+        }
     }
 
     Scaffold(
@@ -45,86 +79,94 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
             BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = userRole)
         }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp)
-        ) {
-            // Address Bar
-            Row(
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp)
             ) {
-                Text(text = "Address: $address", style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = { navController.navigate(MyAddress.route) }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = "Edit Address"
+                // Address Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Address: $address", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = { navController.navigate(MyAddress.route) }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_edit),
+                            contentDescription = "Edit Address"
+                        )
+                    }
+                }
+
+                // Booking Info
+                Text(
+                    text = "My Address is at $address",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                // Requests Section
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Requests (${pendingOrders.size})",
+                        style = MaterialTheme.typography.titleMedium
                     )
+                    TextButton(onClick = { navController.navigate(MyJob.route) }) {
+                        Text(text = "All")
+                    }
                 }
-            }
 
-            // Booking Info
-            Text(
-                text = "My Address is at $address",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-            // Requests Section
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Requests (${requests.size})",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                TextButton(onClick = { navController.navigate(MyJob.route) }) {
-                    Text(text = "All")
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(pendingOrders.size) { index ->
+                        PendingOrderItem(order = pendingOrders[index]) { orderId, status ->
+                            handleOrderAction(orderId, status)
+                        }
+                    }
                 }
-            }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(requests.size) { index ->
-                    RequestItem(request = requests[index])
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Services Section
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Your Listings",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    TextButton(onClick = { navController.navigate(AllJobs.route) }) {
+                        Text(text = "All")
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Listings Section
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Your listing",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                TextButton(onClick = { navController.navigate(AllJobs.route) }) {
-                    Text(text = "All")
-                }
-            }
-
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(listings.size) { index ->
-                    ListingCard(navController = navController, listing = listings[index])
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(services.size) { index ->
+                        ServiceCard(navController = navController, service = services[index])
+                    }
                 }
             }
         }
@@ -132,107 +174,31 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun RequestItem(request: Request) {
-    Card(
+fun PendingOrderItem(order: Order, onAction: (String, String) -> Unit) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+            .padding(16.dp)
     ) {
-        Column(
+        Text(text = "Order from: ${order.userId}", style = MaterialTheme.typography.bodyLarge)
+        Text(text = "Service: ${order.serviceId}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Date: ${order.date}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Address: ${order.address}", style = MaterialTheme.typography.bodyMedium)
+
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual user image
-                    contentDescription = "Request Image",
-                    modifier = Modifier.size(40.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = request.title, style = MaterialTheme.typography.bodyLarge)
-                    Text(text = request.subtitle, style = MaterialTheme.typography.bodySmall)
-                    Text(text = request.timestamp, style = MaterialTheme.typography.bodySmall)
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(painter = painterResource(id = R.drawable.ic_dot), contentDescription = "New Request", tint = Color.Blue)
+            Button(onClick = { onAction(order.id, "accepted") }) {
+                Text("Accept")
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Button(onClick = { /* Handle Accept */ }) {
-                    Text(text = "Accept")
-                }
-                Button(onClick = { /* Handle Reject */ }) {
-                    Text(text = "Reject")
-                }
-                Button(onClick = { /* Handle Chat */ }) {
-                    Text(text = "Chat")
-                }
+            Button(onClick = { onAction(order.id, "cancelled") }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
+                Text("Reject")
             }
         }
     }
 }
-
-@Composable
-fun ListingCard(navController: NavController, listing: Listing) {
-    Card(
-        modifier = Modifier
-            .width(160.dp)
-            .height(240.dp)
-            .clickable { navController.navigate(ServiceDetail.createRoute(listing.serviceName)) },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual service image
-                contentDescription = "Service Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = listing.serviceName, style = MaterialTheme.typography.bodyMedium)
-            Text(text = listing.location, style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.weight(1f))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = listing.price, style = MaterialTheme.typography.bodyMedium)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = "Rating",
-                        tint = Color.Yellow
-                    )
-                    Text(text = listing.rating.toString(), style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-    }
-}
-
-data class Request(
-    val title: String,
-    val subtitle: String,
-    val timestamp: String
-)
-
-data class Listing(
-    val serviceName: String,
-    val location: String,
-    val price: String,
-    val rating: Double
-)

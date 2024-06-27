@@ -17,7 +17,8 @@ espressoCore = "3.5.1"
 libphonenumber = "8.12.19"
 lifecycleRuntimeKtx = "2.8.0"
 activityCompose = "1.9.0"
-composeBom = "2023.08.00"
+#update this if using android at company.
+composeBom = "2024.06.00"
 
 symbolProcessingApi = "1.9.20-1.0.14"
 androidxHiltNavigationCompose = "1.2.0"

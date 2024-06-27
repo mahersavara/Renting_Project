@@ -14,26 +14,52 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import com.example.rentingproject.NavRoute.Inbox
 import com.example.rentingproject.R
-import com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen.CleanerCard
+import com.example.rentingproject.database.model.job.Service
+import com.example.rentingproject.database.model.review.Rating
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceDetailScreen(navController: NavController, serviceName: String, modifier: Modifier = Modifier) {
+fun ServiceDetailScreen(navController: NavController, serviceId: String, modifier: Modifier = Modifier) {
+    val firebaseHelper = FirebaseHelper()
+    val coroutineScope = rememberCoroutineScope()
+    var service by remember { mutableStateOf<Service?>(null) }
     var isLiked by remember { mutableStateOf(false) }
+    val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+
+    LaunchedEffect(serviceId) {
+        coroutineScope.launch {
+            service = firebaseHelper.getServiceById(serviceId)
+            val likedServices = firebaseHelper.getLikedServices(uid)
+            isLiked = likedServices.any { it.id == serviceId }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Booking") },
+                title = { Text(text = "Service Details") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { isLiked = !isLiked }) {
+                    IconButton(onClick = {
+                        coroutineScope.launch {
+                            if (isLiked) {
+                                firebaseHelper.removeLikedService(uid, serviceId)
+                            } else {
+                                service?.let { firebaseHelper.addLikedService(uid, it) }
+                            }
+                            isLiked = !isLiked
+                        }
+                    }) {
                         Icon(
                             painter = painterResource(id = if (isLiked) R.drawable.ic_liked else R.drawable.ic_like),
                             contentDescription = "Like Button"
@@ -43,86 +69,93 @@ fun ServiceDetailScreen(navController: NavController, serviceName: String, modif
             )
         }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual cleaner image
-                contentDescription = "Cleaner Image",
+        service?.let {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(240.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = serviceName,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Location: Near Kent Ridge",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "$40-$100",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_star),
-                    contentDescription = "Rating",
-                    tint = Color.Yellow
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = it.images.firstOrNull()),
+                    contentDescription = "Service Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "4.9 (123)", style = MaterialTheme.typography.bodyMedium)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Description",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { /* TODO Handle Booking */ },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Book now")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Ratings",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(2) { index ->
-                    RatingCard()
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = it.name,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Location: ${it.location}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "\$${it.price}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_star),
+                        contentDescription = "Rating",
+                        tint = Color.Yellow
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "${it.rating} (${it.popularity})", style = MaterialTheme.typography.bodyMedium)
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "You May Also Like",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(4) { index ->
-//                    CleanerCard(navController = navController, serviceName = "Cleaner $index")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Description",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = it.description,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { navController.navigate("chooseDate/${it.id}") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Book now")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            val participants = listOf(it.userId, uid)
+                            val conversationId = firebaseHelper.getOrCreateConversationId(participants)
+                            navController.navigate(Inbox.createRoute(conversationId, participants)) // Navigate to chat screen
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Chat with Cleaner")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Ratings",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(2) { index ->
+                        RatingCard(
+                            rating = Rating(
+                                userName = "User $index",
+                                date = "12/02/2023",
+                                comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -130,7 +163,7 @@ fun ServiceDetailScreen(navController: NavController, serviceName: String, modif
 }
 
 @Composable
-fun RatingCard() {
+fun RatingCard(rating: Rating) {
     Card(
         modifier = Modifier
             .width(240.dp)
@@ -150,19 +183,19 @@ fun RatingCard() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Laura Ingalls",
+                    text = rating.userName,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "12/02/2023",
+                    text = rating.date,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                text = rating.comment,
                 style = MaterialTheme.typography.bodySmall
             )
         }

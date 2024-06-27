@@ -1,12 +1,8 @@
 package com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,22 +20,24 @@ import androidx.navigation.NavController
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.NavRoute.Liked
+import com.example.rentingproject.database.model.job.Service
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifier) {
-    // Current route for bottom navigation
     val currentRoute = Liked.route
-    val likedServices = remember {
-        mutableStateListOf(
-            Service("Cleaning", "Location", "$40", 4.9),
-            Service("Cleaning", "Location", "$40", 4.9),
-            Service("Cleaning", "Location", "$40", 4.9),
-            Service("Cleaning", "Location", "$40", 4.9),
-            Service("Cleaning", "Location", "$40", 4.9),
-            Service("Cleaning", "Location", "$40", 4.9),
-        )
+    val firebaseHelper = FirebaseHelper()
+    val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+    var likedServices by remember { mutableStateOf(listOf<Service>()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            likedServices = firebaseHelper.getLikedServices(uid)
+        }
     }
 
     Scaffold(
@@ -57,7 +55,7 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = currentRoute)
+            BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = "HomeOwner")
         }
     ) {
         Column(
@@ -73,7 +71,7 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(likedServices.size) { index ->
-                    ServiceCard(service = likedServices[index])
+                    LikedServiceCard(service = likedServices[index])
                 }
             }
         }
@@ -81,7 +79,7 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
 }
 
 @Composable
-fun ServiceCard(service: Service) {
+fun LikedServiceCard(service: Service) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -103,7 +101,7 @@ fun ServiceCard(service: Service) {
                     .height(120.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = service.serviceName, style = MaterialTheme.typography.bodyMedium)
+            Text(text = service.name, style = MaterialTheme.typography.bodyMedium)
             Text(text = service.location, style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.weight(1f))
             Row(
@@ -111,26 +109,16 @@ fun ServiceCard(service: Service) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = service.price, style = MaterialTheme.typography.bodyMedium)
+                Text(text = "\$${service.price}", style = MaterialTheme.typography.bodyMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = "Rating",
                         tint = Color.Yellow
                     )
-                    Text(
-                        text = service.rating.toString(),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
     }
 }
-
-data class Service(
-    val serviceName: String,
-    val location: String,
-    val price: String,
-    val rating: Double
-)

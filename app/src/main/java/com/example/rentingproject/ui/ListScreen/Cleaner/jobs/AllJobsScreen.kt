@@ -14,28 +14,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.rentingproject.NavRoute.AllJobs
 import com.example.rentingproject.NavRoute.EditJob
 import com.example.rentingproject.NavRoute.PostJob
 import com.example.rentingproject.R
-import com.example.rentingproject.ui.components.BottomNavItem
+import com.example.rentingproject.database.model.job.Service
 import com.example.rentingproject.ui.components.BottomNavigationBar
-
+import com.example.rentingproject.ui.components.JobItem
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
-    val jobs = remember { mutableStateListOf(
-        Listing("Cleaning", "Location", "$40", 4.9),
-        Listing("Grooming", "Location", "$40", 4.9)
-    ) }
+    val firebaseHelper = FirebaseHelper()
+    val coroutineScope = rememberCoroutineScope()
+    var services by remember { mutableStateOf(listOf<Service>()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val userRole = "Cleaner"
+
+    fun fetchData() {
+        coroutineScope.launch {
+            val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+            services = firebaseHelper.getServices(uid)
+            isLoading = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        fetchData()
+    }
+
+    // Add this to refetch data when coming back to the screen
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        if (destination.route == AllJobs.route) {
+            fetchData()
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Your listing Jobs") },
+                title = { Text(text = "Your Listings") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
@@ -44,7 +66,7 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = AllJobs.route)
+            BottomNavigationBar(navController = navController, currentRoute = AllJobs.route,userRole=userRole)
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate(PostJob.route) }) {
@@ -52,56 +74,21 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
             }
         }
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(jobs.size) { index ->
-                JobItem(navController = navController, job = jobs[index])
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-        }
-    }
-}
-
-
-@Composable
-fun JobItem(navController: NavController, job: Listing) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { navController.navigate(EditJob.createRoute(job.serviceName)) },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual job image
-                contentDescription = "Job Image",
-                modifier = Modifier.size(80.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = job.serviceName, style = MaterialTheme.typography.bodyLarge)
-                Text(text = job.location, style = MaterialTheme.typography.bodySmall)
-                Text(text = job.price, style = MaterialTheme.typography.bodyMedium)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painter = painterResource(id = R.drawable.ic_star), contentDescription = "Rating", tint = Color.Yellow)
-                    Text(text = job.rating.toString(), style = MaterialTheme.typography.bodyMedium)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(services.size) { index ->
+                    JobItem(navController = navController, job = services[index])
                 }
             }
         }
     }
 }
 
-
-data class Listing(
-    val serviceName: String,
-    val location: String,
-    val price: String,
-    val rating: Double
-)

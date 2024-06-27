@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,19 +21,40 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.rentingproject.R
 import com.example.rentingproject.database.model.message.Message
 import com.example.rentingproject.utils.FirebaseHelper
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = Modifier) {
+fun InboxScreen(navController: NavController, conversationId: String, participants: List<String>, modifier: Modifier = Modifier) {
     val firebaseHelper = FirebaseHelper()
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
     var messages by remember { mutableStateOf(listOf<Message>()) }
     var messageText by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    var isSent by remember { mutableStateOf(true) }
 
-    LaunchedEffect(userId) {
-        messages = firebaseHelper.getMessagesForConversation(userId)
+    // Listen for real-time updates
+    LaunchedEffect(isSent) {
+        firebaseHelper.listenForMessages(conversationId) { fetchedMessages ->
+            messages = fetchedMessages
+        }
+        isSent = false
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(6000)
+            firebaseHelper.listenForMessages(conversationId) { fetchedMessages ->
+                messages = fetchedMessages
+            }
+        }
     }
 
     Box(
@@ -61,12 +83,10 @@ fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = 
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
-                reverseLayout = true
+                    .fillMaxWidth()
             ) {
-                items(messages.size) { index ->
-                    val message = messages[index]
-                    MessageItemView(message)
+                items(messages) { message ->
+                    MessageItemView(message, currentUserId)
                 }
             }
 
@@ -86,15 +106,24 @@ fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = 
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(
                         onSend = {
-                            firebaseHelper.sendMessage(userId, messageText)
-                            messageText = ""
+                            if (messageText.isNotBlank()) {
+                                coroutineScope.launch {
+                                    firebaseHelper.sendMessage(conversationId, messageText, participants)
+                                    messageText = ""
+                                    isSent = true
+                                }
+                            }
                         }
                     )
                 )
 
                 IconButton(onClick = {
-                    firebaseHelper.sendMessage(userId, messageText)
-                    messageText = ""
+                    if (messageText.isNotBlank()) {
+                        coroutineScope.launch {
+                            firebaseHelper.sendMessage(conversationId, messageText, participants)
+                            messageText = ""
+                        }
+                    }
                 }) {
                     Icon(Icons.Filled.Send, contentDescription = "Send")
                 }
@@ -104,8 +133,16 @@ fun InboxScreen(navController: NavController, userId: Int, modifier: Modifier = 
 }
 
 @Composable
-fun MessageItemView(message: Message) {
-    val isOwnMessage = message.sender == "Me"
+fun MessageItemView(message: Message, currentUserId: String) {
+    val isOwnMessage = message.sender == currentUserId
+    var avatarUrl by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf("Anonymous User") }
+
+    LaunchedEffect(message.sender) {
+        val userDoc = FirebaseFirestore.getInstance().collection("users").document(message.sender).get().await()
+        avatarUrl = userDoc.getString("profilePicture").orEmpty()
+        userName = userDoc.getString("name").orEmpty().ifBlank { "Anonymous User" }
+    }
 
     Row(
         modifier = Modifier
@@ -115,7 +152,7 @@ fun MessageItemView(message: Message) {
     ) {
         if (!isOwnMessage) {
             Image(
-                painter = painterResource(id = message.avatar),
+                painter = rememberAsyncImagePainter(model = avatarUrl),
                 contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -134,8 +171,11 @@ fun MessageItemView(message: Message) {
                 )
                 .padding(16.dp)
         ) {
-            Text(message.sender, style = MaterialTheme.typography.bodyMedium, color = if (isOwnMessage) Color.Black else Color.White)
+            Text(userName, style = MaterialTheme.typography.bodyMedium, color = if (isOwnMessage) Color.Black else Color.White)
             Text(message.content, style = MaterialTheme.typography.bodyLarge, color = if (isOwnMessage) Color.Black else Color.White)
+            val date = java.util.Date(message.timestamp)
+            val format = java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+            Text(format.format(date), style = MaterialTheme.typography.bodySmall, color = if (isOwnMessage) Color.Black else Color.White)
         }
     }
 }

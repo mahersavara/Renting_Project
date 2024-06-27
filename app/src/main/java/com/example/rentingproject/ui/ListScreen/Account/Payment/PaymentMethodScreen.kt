@@ -2,28 +2,9 @@ package com.example.rentingproject.ui.ListScreen.Account.Payment
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -50,7 +31,7 @@ fun PaymentMethodScreen(navController: NavController, modifier: Modifier = Modif
         },
         bottomBar = {
             Button(
-                onClick = { /* Handle Confirm Action */ },
+                onClick = { navController.popBackStack() }, // Handle Confirm Action
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -64,15 +45,6 @@ fun PaymentMethodScreen(navController: NavController, modifier: Modifier = Modif
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            PaymentMethodItem(
-                icon = R.drawable.ic_credit_card,
-                label = "Debit or credit card",
-                selected = selectedMethod == "Debit or credit card",
-                onSelect = { selectedMethod = "Debit or credit card" }
-            )
-
-            Divider()
-
             PaymentMethodItem(
                 icon = R.drawable.ic_cash,
                 label = "Cash",

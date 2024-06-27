@@ -13,23 +13,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import com.example.rentingproject.NavRoute.Inbox
 import com.example.rentingproject.NavRoute.MyJob
 import com.example.rentingproject.R
-import com.example.rentingproject.ui.components.BottomNavItem
+import com.example.rentingproject.database.model.Order
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
-// This related to my requests
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MyJobScreen(navController: NavController, modifier: Modifier = Modifier) {
-    val requests = remember { mutableStateListOf(
-        Request("Cleaning - [Address]", "Request for Sun Mar 31, 5:36pm", "1 hrs ago"),
-        Request("Grooming - [Address]", "Request for Sun Mar 31, 6:00pm", "2 hrs ago"),
-        Request("Cleaning - [Address]", "Request for Sun Mar 31, 5:36pm", "1 hrs ago")
-    ) }
+    val firebaseHelper = FirebaseHelper()
+    val coroutineScope = rememberCoroutineScope()
+    var pendingOrders by remember { mutableStateOf(listOf<Order>()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val userRole = "Cleaner"
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+            pendingOrders = firebaseHelper.getPendingOrdersForCleaner(uid)
+            isLoading = false
+        }
+    }
+
+    fun handleOrderAction(orderId: String, status: String) {
+        coroutineScope.launch {
+            firebaseHelper.updateOrderStatus(orderId, status) { success ->
+                if (success) {
+                    pendingOrders = pendingOrders.filter { it.id != orderId }
+                } else {
+                    // handle error
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -43,23 +66,34 @@ fun MyJobScreen(navController: NavController, modifier: Modifier = Modifier) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = MyJob.route)
+            BottomNavigationBar(navController = navController, currentRoute = MyJob.route, userRole = userRole)
         }
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(requests.size) { index ->
-                RequestItem(request = requests[index])
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(pendingOrders.size) { index ->
+                    PendingOrderItem(order = pendingOrders[index], navController, firebaseHelper) { orderId, status ->
+                        handleOrderAction(orderId, status)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun RequestItem(request: Request) {
+fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper: FirebaseHelper, onAction: (String, String) -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+    val currentUserId = firebaseHelper.auth.currentUser?.uid.orEmpty()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,85 +107,38 @@ fun RequestItem(request: Request) {
                 .padding(16.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual user image
-                    contentDescription = "Request Image",
-                    modifier = Modifier.size(40.dp)
-                )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = request.title, style = MaterialTheme.typography.bodyLarge)
-                    Text(text = request.subtitle, style = MaterialTheme.typography.bodySmall)
-                    Text(text = request.timestamp, style = MaterialTheme.typography.bodySmall)
+                    Text(text = "Service: ${order.serviceId}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "Date: ${order.date}", style = MaterialTheme.typography.bodySmall)
+                    Text(text = "Address: ${order.address}", style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                Icon(painter = painterResource(id = R.drawable.ic_dot), contentDescription = "New Request", tint = Color.Blue)
+                if (order.status == "pending") {
+                    Icon(painter = painterResource(id = R.drawable.ic_dot), contentDescription = "New Request", tint = Color.Blue)
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = { /* Handle Accept */ }) {
+                Button(onClick = { onAction(order.id, "accepted") }) {
                     Text(text = "Accept")
                 }
-                Button(onClick = { /* Handle Reject */ }) {
+                Button(onClick = { onAction(order.id, "cancelled") }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
                     Text(text = "Reject")
                 }
-                Button(onClick = { /* Handle Chat */ }) {
+                Button(onClick = {
+                    coroutineScope.launch {
+                        val participants = listOf(order.userId, currentUserId)
+                        val conversationId = firebaseHelper.getOrCreateConversationId(participants)
+                        navController.navigate(Inbox.createRoute(conversationId, participants)) // Navigate to chat screen
+                    }
+                }) {
                     Text(text = "Chat")
                 }
             }
         }
     }
 }
-
-data class Request(
-    val title: String,
-    val subtitle: String,
-    val timestamp: String
-)
-
-@Composable
-fun BottomNavigationBar(
-    navController: NavController,
-    currentRoute: String,
-    modifier: Modifier = Modifier
-) {
-    val items = listOf(
-        BottomNavItem("homeowner", R.drawable.ic_home, "Home"),
-        BottomNavItem("job", R.drawable.ic_job, "My Job"),
-        BottomNavItem("booking", R.drawable.ic_booking, "Booking"),
-        BottomNavItem("message", R.drawable.ic_message, "Message"),
-        BottomNavItem("account", R.drawable.ic_me, "Me")
-    )
-
-    NavigationBar(
-        modifier = modifier
-    ) {
-        items.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(id = item.icon),
-                        contentDescription = item.label
-                    )
-                },
-                selected = currentRoute == item.route,
-                onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-data class BottomNavItem(val route: String, val icon: Int, val label: String)

@@ -44,11 +44,18 @@ object SignUp : Destination {
 object Message: Destination {
     override val route = "message"
 }
+
+
+
 object Inbox : Destination {
-    const val userIdArg = "userId"
-    override val route = "inbox/{$userIdArg}"
-    // comments
-    fun createRoute(userId: Int) = "inbox/$userId"
+    const val conversationIdArg = "conversationId"
+    const val participantsArg = "participants"
+    override val route = "inbox/{$conversationIdArg}/{$participantsArg}"
+
+    fun createRoute(conversationId: String, participants: List<String>): String {
+        val participantsStr = participants.joinToString(separator = ",")
+        return "inbox/$conversationId/$participantsStr"
+    }
 }
 
 // Sprint 2: HomeOwner Management System
@@ -59,9 +66,9 @@ object HomeOwnerHome : Destination {
 
 
 object ServiceDetail : Destination {
-    const val serviceNameArg = "serviceName"
-    override val route = "servicedetail/{$serviceNameArg}"
-    fun createRoute(serviceName: String) = "servicedetail/$serviceName"
+    const val serviceIdArg = "serviceId"
+    override val route = "servicedetail/{$serviceIdArg}"
+    fun createRoute(serviceId: String) = "servicedetail/$serviceId"
 }
 
 
@@ -96,7 +103,7 @@ object deliveryAddressDetail:Destination{
     override val route= "deliveryAddressDetail"
 }
 object payment:Destination{
-    override val route= "payment"
+    override val route= "payment_profile"
 }
 object orderstatus:Destination{
     override val route= "orderstatus"
@@ -130,18 +137,19 @@ object MyJobDetail : Destination {
     override val route = "myjobdetail"
 }
 
-object PostJob : Destination {
-    override val route = "postjob"
-}
 
 object AllJobs : Destination {
     override val route = "all_jobs"
 }
 
 object EditJob : Destination {
-    const val serviceNameArg = "serviceName"
-    override val route = "edit_job/{$serviceNameArg}"
-    fun createRoute(serviceName: String) = "edit_job/$serviceName"
+    const val serviceIdArg = "serviceId"
+    override val route = "edit_job/{$serviceIdArg}"
+    fun createRoute(serviceId: String) = "edit_job/$serviceId"
+}
+
+object PostJob : Destination {
+    override val route = "postjob"
 }
 
 
@@ -150,8 +158,31 @@ object EditJob : Destination {
     // chung payment option at profile
 
 
+object ChooseDate : Destination {
+    const val serviceIdArg = "serviceId"
+    override val route = "chooseDate/{$serviceIdArg}"
+    fun createRoute(serviceId: String) = "chooseDate/$serviceId"
+}
 
 
+object DeliveryAddress : Destination {
+    const val serviceIdArg = "serviceId"
+    const val dateArg = "date"
+    override val route = "deliveryAddress/{$serviceIdArg}/{$dateArg}"
+    fun createRoute(serviceId: String, date: String) = "deliveryAddress/$serviceId/$date"
+}
+
+object PaymentBooking : Destination {
+    const val serviceIdArg = "serviceId"
+    const val dateArg = "date"
+    const val addressArg = "address"
+    override val route = "payment/{$serviceIdArg}/{$dateArg}/{$addressArg}"
+    fun createRoute(serviceId: String, date: String, address: String) = "payment/$serviceId/$date/$address"
+}
+
+object OrderSuccess : Destination {
+    override val route = "orderSuccess"
+}
 
 
 
