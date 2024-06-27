@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
 import com.example.rentingproject.database.model.Order
-import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
@@ -31,7 +31,6 @@ import timber.log.Timber
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +38,7 @@ import java.util.Locale
 fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
     val today = LocalDate.now()
     var selectedDate by remember { mutableStateOf(today) }
+    var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val firebaseHelper = FirebaseHelper()
     var bookings by remember { mutableStateOf(listOf<Order>()) }
     val coroutineScope = rememberCoroutineScope()
@@ -46,7 +46,11 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
-            bookings = firebaseHelper.getAcceptedOrders(uid)
+            firebaseHelper.getUserRole(uid) { role ->
+                coroutineScope.launch {
+                    bookings = firebaseHelper.getAcceptedOrders(uid, role == "HomeOwner")
+                }
+            }
         }
     }
 
@@ -71,27 +75,32 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
                 .padding(it)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            CalendarView(selectedDate = selectedDate, onDateSelected = { date ->
-                selectedDate = date
-            }, bookings = bookings)
+            MonthlyCalendarView(
+                currentMonth = currentMonth,
+                selectedDate = selectedDate,
+                onDateSelected = { date ->
+                    selectedDate = date
+                },
+                onMonthChanged = { month ->
+                    currentMonth = month
+                },
+                bookings = bookings
+            )
             Spacer(modifier = Modifier.height(16.dp))
-            BookingList(selectedDate = selectedDate, bookings = bookings, onCancel = { orderId ->
-                coroutineScope.launch {
-                    firebaseHelper.updateOrderStatus(orderId, "cancelled") { success ->
-                        if (success) {
-                            coroutineScope.launch {   bookings = firebaseHelper.getAcceptedOrders(firebaseHelper.auth.currentUser?.uid.orEmpty()) }
-                        }
-                    }
-                }
-            })
+            BookingList(selectedDate = selectedDate, bookings = bookings)
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CalendarView(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, bookings: List<Order>) {
-    val currentMonth = YearMonth.now()
+fun MonthlyCalendarView(
+    currentMonth: YearMonth,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    onMonthChanged: (YearMonth) -> Unit,
+    bookings: List<Order>
+) {
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfMonth = currentMonth.atDay(1).dayOfWeek.value
 
@@ -101,51 +110,61 @@ fun CalendarView(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, b
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { onDateSelected(selectedDate.minusMonths(1)) }) {
+            IconButton(onClick = { onMonthChanged(currentMonth.minusMonths(1)) }) {
                 Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Previous Month")
             }
             Text(
-                text = "${currentMonth.month.name.lowercase().capitalize(Locale.getDefault())} ${currentMonth.year}",
+                text = "${currentMonth.month.name.lowercase().capitalize()} ${currentMonth.year}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            IconButton(onClick = { onDateSelected(selectedDate.plusMonths(1)) }) {
+            IconButton(onClick = { onMonthChanged(currentMonth.plusMonths(1)) }) {
                 Icon(painter = painterResource(id = R.drawable.ic_forward), contentDescription = "Next Month")
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            items(daysInMonth + firstDayOfMonth) { index ->
-                val day = index - firstDayOfMonth + 1
-                if (index >= firstDayOfMonth) {
-                    val date = LocalDate.of(currentMonth.year, currentMonth.month, day)
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable { onDateSelected(date) }
-                    ) {
-                        Text(
-                            text = date.dayOfWeek.name.take(3),
-                            fontSize = 12.sp,
-                            fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal
-                        )
-                        Text(
-                            text = day.toString(),
-                            fontSize = 18.sp,
-                            fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal,
-                            color = if (selectedDate == date) MaterialTheme.colorScheme.primary else Color.Unspecified
-                        )
-                        if (bookings.any { LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma", Locale.getDefault())) == date }) {
-                            Box(
+        Column {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEach { day ->
+                    Text(
+                        text = day,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            for (week in 0 until ((daysInMonth + firstDayOfMonth - 1) / 7 + 1)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    for (day in 1..7) {
+                        val dateIndex = week * 7 + day - firstDayOfMonth + 1
+                        if (dateIndex in 1..daysInMonth) {
+                            val date = LocalDate.of(currentMonth.year, currentMonth.month, dateIndex)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-                                    .size(6.dp)
-                                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                            )
+                                    .weight(1f)
+                                    .padding(8.dp)
+                                    .clickable { onDateSelected(date) }
+                            ) {
+                                Text(
+                                    text = date.dayOfMonth.toString(),
+                                    fontSize = 18.sp,
+                                    fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (selectedDate == date) MaterialTheme.colorScheme.primary else Color.Unspecified
+                                )
+                                if (bookings.any { LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma")) == date }) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
+                                    )
+                                }
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
-                } else {
-                    Spacer(modifier = Modifier.width(24.dp))
                 }
             }
         }
@@ -154,8 +173,10 @@ fun CalendarView(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, b
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BookingList(selectedDate: LocalDate, bookings: List<Order>, onCancel: (String) -> Unit) {
-    val filteredBookings = bookings.filter { LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma", Locale.getDefault())) == selectedDate }
+fun BookingList(selectedDate: LocalDate, bookings: List<Order>) {
+    val filteredBookings = bookings.filter {
+        LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma")) == selectedDate
+    }
 
     if (filteredBookings.isEmpty()) {
         Box(
@@ -167,14 +188,14 @@ fun BookingList(selectedDate: LocalDate, bookings: List<Order>, onCancel: (Strin
     } else {
         LazyColumn {
             items(filteredBookings) { booking ->
-                BookingItem(booking, onCancel)
+                BookingItem(booking)
             }
         }
     }
 }
 
 @Composable
-fun BookingItem(booking: Order, onCancel: (String) -> Unit) {
+fun BookingItem(booking: Order) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -197,7 +218,7 @@ fun BookingItem(booking: Order, onCancel: (String) -> Unit) {
                 Icon(painter = painterResource(id = R.drawable.ic_message), contentDescription = "Chat")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = { onCancel(booking.id) }) {
+            IconButton(onClick = { /* Handle Cancel */ }) {
                 Icon(painter = painterResource(id = R.drawable.ic_cancel), contentDescription = "Cancel")
             }
         }
@@ -205,35 +226,46 @@ fun BookingItem(booking: Order, onCancel: (String) -> Unit) {
     }
 }
 
-suspend fun FirebaseHelper.getAcceptedOrders(uid: String): List<Order> {
-    Timber.d("Fetching services for cleaner with uid: $uid")
+
+
+suspend fun FirebaseHelper.getAcceptedOrders(uid: String, isHomeOwner: Boolean): List<Order> {
+    Timber.d("Fetching accepted orders for user with uid: $uid")
     return try {
-        // Fetch services provided by the cleaner
-        val servicesSnapshot = db.collection("services")
-            .whereEqualTo("userId", uid)
-            .get()
-            .await()
+        val ordersSnapshot = if (isHomeOwner) {
+            db.collection("orders")
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("status", "accepted")
+                .get()
+                .await()
+        } else {
+            // Fetch services provided by the cleaner
+            val servicesSnapshot = db.collection("services")
+                .whereEqualTo("userId", uid)
+                .get()
+                .await()
 
-        val serviceIds = servicesSnapshot.documents.mapNotNull { it.id }
-        Timber.d("Fetched ${serviceIds.size} services for cleaner with uid: $uid")
+            val serviceIds = servicesSnapshot.documents.mapNotNull { it.id }
+            Timber.d("Fetched ${serviceIds.size} services for cleaner with uid: $uid")
 
-        // Fetch orders for those services
-        val ordersSnapshot = db.collection("orders")
-            .whereIn("serviceId", serviceIds)
-            .whereEqualTo("status", "accepted")
-            .get()
-            .await()
+            // Fetch orders for those services
+            db.collection("orders")
+                .whereIn("serviceId", serviceIds)
+                .whereEqualTo("status", "accepted")
+                .get()
+                .await()
+        }
 
         val orders = ordersSnapshot.documents.mapNotNull { it.toObject(Order::class.java) }
 
-        Timber.d("Fetched ${orders.size} accepted orders for cleaner with uid: $uid")
+        Timber.d("Fetched ${orders.size} accepted orders for user with uid: $uid")
         orders.forEach { order ->
             Timber.d("Order ID: ${order.id}, Service ID: ${order.serviceId}, Date: ${order.date}, Status: ${order.status}")
         }
 
         orders
     } catch (e: Exception) {
-        Timber.e(e, "Error fetching accepted orders for cleaner with uid: $uid")
+        Timber.e(e, "Error fetching accepted orders for user with uid: $uid")
         emptyList()
     }
 }
+
