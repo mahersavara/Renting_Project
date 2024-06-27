@@ -4,36 +4,13 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,15 +19,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.rentingproject.NavRoute.Account
-import com.example.rentingproject.NavRoute.BookingCalendar
-import com.example.rentingproject.NavRoute.HomeOwnerHome
-import com.example.rentingproject.NavRoute.Liked
-import com.example.rentingproject.NavRoute.Message
+import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
+import com.example.rentingproject.database.model.Order
 import com.example.rentingproject.ui.components.BottomNavItem
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +39,16 @@ import java.time.LocalDate
 fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
     val today = LocalDate.now()
     var selectedDate by remember { mutableStateOf(today) }
-    val bookings = remember { mutableStateOf(sampleBookings()) }
+    val firebaseHelper = FirebaseHelper()
+    var bookings by remember { mutableStateOf(listOf<Order>()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+            bookings = firebaseHelper.getAcceptedOrders(uid)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -83,54 +73,89 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
         ) {
             CalendarView(selectedDate = selectedDate, onDateSelected = { date ->
                 selectedDate = date
-            }, bookings = bookings.value)
+            }, bookings = bookings)
             Spacer(modifier = Modifier.height(16.dp))
-            BookingList(selectedDate = selectedDate, bookings = bookings.value)
+            BookingList(selectedDate = selectedDate, bookings = bookings, onCancel = { orderId ->
+                coroutineScope.launch {
+                    firebaseHelper.updateOrderStatus(orderId, "cancelled") { success ->
+                        if (success) {
+                            coroutineScope.launch {   bookings = firebaseHelper.getAcceptedOrders(firebaseHelper.auth.currentUser?.uid.orEmpty()) }
+                        }
+                    }
+                }
+            })
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CalendarView(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, bookings: List<Booking>) {
-    // Mock Calendar View
-    // Replace with a real calendar component
-    val dates = (1..30).map { LocalDate.of(selectedDate.year, selectedDate.month, it) }
+fun CalendarView(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, bookings: List<Order>) {
+    val currentMonth = YearMonth.now()
+    val daysInMonth = currentMonth.lengthOfMonth()
+    val firstDayOfMonth = currentMonth.atDay(1).dayOfWeek.value
 
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        items(dates) { date ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clickable { onDateSelected(date) }
-            ) {
-                Text(
-                    text = date.dayOfWeek.name.take(3),
-                    fontSize = 12.sp,
-                    fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal
-                )
-                Text(
-                    text = date.dayOfMonth.toString(),
-                    fontSize = 18.sp,
-                    fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal,
-                    color = if (selectedDate == date) MaterialTheme.colorScheme.primary else Color.Unspecified
-                )
-                if (bookings.any { it.date == date }) {
-                    Box(
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { onDateSelected(selectedDate.minusMonths(1)) }) {
+                Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Previous Month")
+            }
+            Text(
+                text = "${currentMonth.month.name.lowercase().capitalize(Locale.getDefault())} ${currentMonth.year}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = { onDateSelected(selectedDate.plusMonths(1)) }) {
+                Icon(painter = painterResource(id = R.drawable.ic_forward), contentDescription = "Next Month")
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            items(daysInMonth + firstDayOfMonth) { index ->
+                val day = index - firstDayOfMonth + 1
+                if (index >= firstDayOfMonth) {
+                    val date = LocalDate.of(currentMonth.year, currentMonth.month, day)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .size(6.dp)
-                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                    )
+                            .padding(8.dp)
+                            .clickable { onDateSelected(date) }
+                    ) {
+                        Text(
+                            text = date.dayOfWeek.name.take(3),
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal
+                        )
+                        Text(
+                            text = day.toString(),
+                            fontSize = 18.sp,
+                            fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal,
+                            color = if (selectedDate == date) MaterialTheme.colorScheme.primary else Color.Unspecified
+                        )
+                        if (bookings.any { LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma", Locale.getDefault())) == date }) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
+                            )
+                        }
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(24.dp))
                 }
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BookingList(selectedDate: LocalDate, bookings: List<Booking>) {
-    val filteredBookings = bookings.filter { it.date == selectedDate }
+fun BookingList(selectedDate: LocalDate, bookings: List<Order>, onCancel: (String) -> Unit) {
+    val filteredBookings = bookings.filter { LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma", Locale.getDefault())) == selectedDate }
 
     if (filteredBookings.isEmpty()) {
         Box(
@@ -142,26 +167,26 @@ fun BookingList(selectedDate: LocalDate, bookings: List<Booking>) {
     } else {
         LazyColumn {
             items(filteredBookings) { booking ->
-                BookingItem(booking)
+                BookingItem(booking, onCancel)
             }
         }
     }
 }
 
 @Composable
-fun BookingItem(booking: Booking) {
+fun BookingItem(booking: Order, onCancel: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         Text(
-            text = "${booking.time} - ${booking.service}",
+            text = "${booking.date} - ${booking.serviceId}",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Pickup Location: ${booking.location}",
+            text = "Pickup Location: ${booking.address}",
             style = MaterialTheme.typography.bodySmall
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -172,7 +197,7 @@ fun BookingItem(booking: Booking) {
                 Icon(painter = painterResource(id = R.drawable.ic_message), contentDescription = "Chat")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = { /* Handle Cancel */ }) {
+            IconButton(onClick = { onCancel(booking.id) }) {
                 Icon(painter = painterResource(id = R.drawable.ic_cancel), contentDescription = "Cancel")
             }
         }
@@ -180,49 +205,35 @@ fun BookingItem(booking: Booking) {
     }
 }
 
-data class Booking(val date: LocalDate, val time: String, val service: String, val location: String)
+suspend fun FirebaseHelper.getAcceptedOrders(uid: String): List<Order> {
+    Timber.d("Fetching services for cleaner with uid: $uid")
+    return try {
+        // Fetch services provided by the cleaner
+        val servicesSnapshot = db.collection("services")
+            .whereEqualTo("userId", uid)
+            .get()
+            .await()
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun sampleBookings(): List<Booking> {
-    val today = LocalDate.now()
-    return listOf(
-        Booking(today, "10:00-11:00", "Cleaning with Cleaner A", "38 Ton Duc Thang"),
-        Booking(today, "14:00-15:00", "Training with Trainer B", "38 Ton Duc Thang"),
-        Booking(today.plusDays(1), "19:00-20:00", "Play with A", "38 Ton Duc Thang")
-    )
-}
+        val serviceIds = servicesSnapshot.documents.mapNotNull { it.id }
+        Timber.d("Fetched ${serviceIds.size} services for cleaner with uid: $uid")
 
-data class BottomNavItem(val route: String, val icon: Int, val label: String)
+        // Fetch orders for those services
+        val ordersSnapshot = db.collection("orders")
+            .whereIn("serviceId", serviceIds)
+            .whereEqualTo("status", "accepted")
+            .get()
+            .await()
 
-@Composable
-fun BottomNavigationBar(navController: NavController, currentRoute: String, modifier: Modifier = Modifier) {
-    val items = listOf(
-        BottomNavItem(HomeOwnerHome.route, R.drawable.ic_home, "Home"),
-        BottomNavItem(Liked.route, R.drawable.ic_liked_bottom, "Liked"),
-        BottomNavItem(BookingCalendar.route, R.drawable.ic_booking, "Booking"),
-        BottomNavItem(Message.route, R.drawable.ic_message, "Message"),
-        BottomNavItem(Account.route, R.drawable.ic_me, "Account")
-    )
+        val orders = ordersSnapshot.documents.mapNotNull { it.toObject(Order::class.java) }
 
-    NavigationBar(
-        modifier = modifier
-    ) {
-        items.forEach { item ->
-            NavigationBarItem(
-                icon = { Icon(painter = painterResource(id = item.icon), contentDescription = item.label) },
-                selected = currentRoute == item.route,
-                onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                        }
-                    }
-                }
-            )
+        Timber.d("Fetched ${orders.size} accepted orders for cleaner with uid: $uid")
+        orders.forEach { order ->
+            Timber.d("Order ID: ${order.id}, Service ID: ${order.serviceId}, Date: ${order.date}, Status: ${order.status}")
         }
+
+        orders
+    } catch (e: Exception) {
+        Timber.e(e, "Error fetching accepted orders for cleaner with uid: $uid")
+        emptyList()
     }
 }
