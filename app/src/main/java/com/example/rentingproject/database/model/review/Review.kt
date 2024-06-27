@@ -1,9 +1,11 @@
 package com.example.rentingproject.database.model.review
-
 data class Review(
-    val reviewerName: String = "",
-    val reviewerProfileImage: String = "",
-    val reviewDate: String = "",
-    val reviewContent: String = "",
-    val rating: Double = 0.0
+    val orderId: String = "",
+    val serviceId: String = "",
+    val userId: String = "",
+    val userName: String = "",
+    val userImage: String = "",
+    val rating: Float = 0f,
+    val reviewText: String = "",
+    val timestamp: Long = 0L
 )

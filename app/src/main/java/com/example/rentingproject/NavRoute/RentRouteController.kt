@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rentingproject.ui.ListScreen.Account.AccountScreen
+import com.example.rentingproject.ui.ListScreen.Account.LeaveReview.LeaveReviewScreen
 import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressDetailScreen
 import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressScreen
 import com.example.rentingproject.ui.ListScreen.Account.Payment.PaymentMethodScreen
@@ -27,13 +28,12 @@ import com.example.rentingproject.ui.ListScreen.HomeOwner.Booking.BookingScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.homescreen.HomeOwnerHomepageScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.InboxScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.MessageScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.Review.LeaveReviewScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.Review.TransactionHistoryScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.ServiceDetailScreen
 import com.example.rentingproject.ui.ListScreen.IntroduceScreen.IntroduceScreen
 import com.example.rentingproject.ui.ListScreen.Account.LoginScreen.LoginScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
 import com.example.rentingproject.ui.ListScreen.Account.RegisterScreen.SignUpScreen
+import com.example.rentingproject.ui.ListScreen.Account.TransactionHistory.TransactionHistoryScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.homescreen.CleanerHomePage
 import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.ChooseDateScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.DeliveryAddressScreen
@@ -133,16 +133,17 @@ fun RentRouteController(modifier: Modifier = Modifier, dataStoreHelper: DataStor
             LikedServiceScreen(navController)
         }
 
-        composable(transactionhistory.route) {
+        composable(TransactionHistory.route) {
             TransactionHistoryScreen(navController = navController)
         }
         composable(
             route = LeaveReview.route,
-            arguments = listOf(navArgument(LeaveReview.serviceNameArg) { type = NavType.StringType })
+            arguments = listOf(navArgument(LeaveReview.orderIdArg) { type = NavType.StringType })
         ) { backStackEntry ->
-            val serviceName = backStackEntry.arguments?.getString(LeaveReview.serviceNameArg) ?: ""
-            LeaveReviewScreen(navController = navController, serviceName = serviceName)
+            val orderId = backStackEntry.arguments?.getString(LeaveReview.orderIdArg) ?: ""
+            LeaveReviewScreen(navController = navController, orderId = orderId)
         }
+
 
         //CLeaner section
         composable(CleanerHome.route) { CleanerHomePage(navController = navController) }

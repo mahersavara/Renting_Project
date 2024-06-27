@@ -110,14 +110,14 @@ object orderstatus:Destination{
 }
 
             // Review section
-object transactionhistory:Destination{
+object TransactionHistory:Destination{
     override val route= "transactionhistory"
 }
 
 object LeaveReview : Destination {
-    const val serviceNameArg = "serviceName"
-    override val route = "leave_review/{$serviceNameArg}"
-    fun createRoute(serviceName: String) = "leave_review/$serviceName"
+    const val orderIdArg = "orderId"
+    override val route = "leaveReview/{$orderIdArg}"
+    fun createRoute(orderId: String) = "leaveReview/$orderId"
 }
 
 

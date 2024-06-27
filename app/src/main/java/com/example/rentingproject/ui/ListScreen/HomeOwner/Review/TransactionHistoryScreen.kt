@@ -1,48 +1,41 @@
-package com.example.rentingproject.ui.ListScreen.HomeOwner.Review
+package com.example.rentingproject.ui.ListScreen.Account.TransactionHistory
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rentingproject.NavRoute.LeaveReview
 import com.example.rentingproject.R
+import com.example.rentingproject.database.model.Order
+import com.example.rentingproject.utils.FirebaseHelper
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = Modifier) {
-    val transactions = remember { mutableStateListOf(
-        Transaction("Grooming", "Location", "$40", 4.9, false),
-        Transaction("Cleaning", "Location", "$40", 4.9, true)
-    ) }
+    val firebaseHelper = FirebaseHelper()
+    val coroutineScope = rememberCoroutineScope()
+    var orders by remember { mutableStateOf(listOf<Order>()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            orders = firebaseHelper.getUserOrders(uid)
+            isLoading = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -56,61 +49,63 @@ fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = 
             )
         }
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(transactions) { transaction ->
-                TransactionItem(navController, transaction)
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-        }
-    }
-}
-@Composable
-fun TransactionItem(navController: NavController, transaction: Transaction) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual service image
-                contentDescription = "Service Image",
-                modifier = Modifier.size(80.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = transaction.serviceName, style = MaterialTheme.typography.bodyLarge)
-                Text(text = transaction.location, style = MaterialTheme.typography.bodySmall)
-                Text(text = transaction.price, style = MaterialTheme.typography.bodyMedium)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painter = painterResource(id = R.drawable.ic_star), contentDescription = "Rating", tint = Color.Yellow)
-                    Text(text = transaction.rating.toString(), style = MaterialTheme.typography.bodyMedium)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                items(orders.size) { index ->
+                    val order = orders[index]
+                    val orderDate = SimpleDateFormat("EEE MMM dd yyyy, hh:mma", Locale.getDefault()).parse(order.date)
+                    val isExpired = orderDate?.before(Date()) ?: false
+
+                    if (order.status == "accepted" && isExpired) {
+                        var hasReviewed by remember { mutableStateOf(false) }
+
+                        LaunchedEffect(order.id) {
+                            coroutineScope.launch {
+                                hasReviewed = firebaseHelper.hasReviewedOrder(order.id)
+                            }
+                        }
+
+                        if (!hasReviewed) {
+                            TransactionHistoryItem(navController, order)
+                        }
+                    }
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(
-                onClick = { navController.navigate(LeaveReview.createRoute(transaction.serviceName)) },
-                enabled = !transaction.reviewed
-            ) {
-                Text(text = if (transaction.reviewed) "Reviewed" else "Review")
-            }
         }
     }
 }
 
-
-data class Transaction(
-    val serviceName: String,
-    val location: String,
-    val price: String,
-    val rating: Double,
-    var reviewed: Boolean
-)
+@Composable
+fun TransactionHistoryItem(navController: NavController, order: Order) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clickable {
+                navController.navigate(LeaveReview.createRoute(order.id))
+            }
+    ) {
+        Text(
+            text = "Service: ${order.serviceId}",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Date: ${order.date}",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = "Address: ${order.address}",
+            style = MaterialTheme.typography.bodySmall
+        )
+        Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+    }
+}

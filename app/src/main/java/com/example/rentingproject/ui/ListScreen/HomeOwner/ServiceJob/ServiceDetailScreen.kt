@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,9 +19,12 @@ import coil.compose.rememberImagePainter
 import com.example.rentingproject.NavRoute.Inbox
 import com.example.rentingproject.R
 import com.example.rentingproject.database.model.job.Service
-import com.example.rentingproject.database.model.review.Rating
+import com.example.rentingproject.database.model.review.Review
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,6 +34,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
     val coroutineScope = rememberCoroutineScope()
     var service by remember { mutableStateOf<Service?>(null) }
     var isLiked by remember { mutableStateOf(false) }
+    var reviews by remember { mutableStateOf(listOf<Review>()) }
     val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
 
     LaunchedEffect(serviceId) {
@@ -37,6 +42,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
             service = firebaseHelper.getServiceById(serviceId)
             val likedServices = firebaseHelper.getLikedServices(uid)
             isLiked = likedServices.any { it.id == serviceId }
+            reviews = firebaseHelper.getReviewsForService(serviceId)
         }
     }
 
@@ -139,7 +145,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Ratings",
+                    text = "Reviews",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -147,14 +153,8 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(2) { index ->
-                        RatingCard(
-                            rating = Rating(
-                                userName = "User $index",
-                                date = "12/02/2023",
-                                comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                            )
-                        )
+                    items(reviews) { review ->
+                        ReviewCard(review = review)
                     }
                 }
             }
@@ -163,7 +163,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
 }
 
 @Composable
-fun RatingCard(rating: Rating) {
+fun ReviewCard(review: Review) {
     Card(
         modifier = Modifier
             .width(240.dp)
@@ -177,25 +177,26 @@ fun RatingCard(rating: Rating) {
                 .padding(8.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_user),
-                    contentDescription = "User Image"
+                Image(
+                    painter = rememberImagePainter(data = review.userImage),
+                    contentDescription = "User Image",
+                    modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = rating.userName,
+                    text = review.userName,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = rating.date,
+                    text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(review.timestamp)),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = rating.comment,
+                text = review.reviewText,
                 style = MaterialTheme.typography.bodySmall
             )
         }

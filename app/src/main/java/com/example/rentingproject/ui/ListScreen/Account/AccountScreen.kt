@@ -127,7 +127,7 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (userRole == "HomeOwner") {
-                ListItem("Transaction history", id = R.drawable.ic_trans_history, navController = navController)
+                ListItem("Transaction history", id = R.drawable.ic_trans_history, navController = navController, route = TransactionHistory.route)
             }
 
             ListItem("Privacy & Security", id = R.drawable.ic_privacy, navController = navController)

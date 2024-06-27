@@ -8,6 +8,7 @@ import com.example.rentingproject.database.model.address.Address
 import com.example.rentingproject.database.model.job.Listing
 import com.example.rentingproject.database.model.job.Service
 import com.example.rentingproject.database.model.message.Message
+import com.example.rentingproject.database.model.review.Review
 import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.Conversation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -630,6 +631,79 @@ class FirebaseHelper {
         } catch (e: Exception) {
             Timber.e(e, "Error fetching pending orders for cleaner with uid: $uid")
             emptyList()
+        }
+    }
+
+
+    suspend fun getUserOrders(uid: String): List<Order> {
+        return try {
+            val snapshot = db.collection("orders")
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("status", "accepted")
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching orders")
+            emptyList()
+        }
+    }
+
+    suspend fun hasReviewedOrder(orderId: String): Boolean {
+        return try {
+            val snapshot = db.collection("reviews")
+                .whereEqualTo("orderId", orderId)
+                .get()
+                .await()
+            !snapshot.isEmpty
+        } catch (e: Exception) {
+            Timber.e(e, "Error checking review status for order $orderId")
+            false
+        }
+    }
+
+    suspend fun leaveReview(userId: String, orderId: String, rating: Int, reviewText: String) {
+        val order = db.collection("orders").document(orderId).get().await().toObject(Order::class.java)
+        val user = db.collection("users").document(userId).get().await()
+
+        if (order != null && user != null) {
+            val review = Review(
+                orderId = orderId,
+                serviceId = order.serviceId,
+                userId = userId,
+                userName = user.getString("name") ?: "",
+                userImage = user.getString("profilePicture") ?: "",
+                rating = rating.toFloat(),
+                reviewText = reviewText,
+                timestamp = System.currentTimeMillis()
+            )
+
+            db.collection("reviews").add(review).await()
+        }
+    }
+
+
+
+
+    suspend fun getReviewsForService(serviceId: String): List<Review> {
+        return try {
+            val snapshot = db.collection("reviews")
+                .whereEqualTo("serviceId", serviceId)
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { it.toObject(Review::class.java) }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching reviews for service: $serviceId")
+            emptyList()
+        }
+    }
+    suspend fun getOrderById(orderId: String): Order? {
+        return try {
+            val document = db.collection("orders").document(orderId).get().await()
+            document.toObject(Order::class.java)
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching order with ID: $orderId")
+            null
         }
     }
 
