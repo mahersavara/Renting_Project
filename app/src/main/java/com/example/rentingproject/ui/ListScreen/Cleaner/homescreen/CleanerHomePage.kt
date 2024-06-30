@@ -44,7 +44,7 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
             val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
             val addresses = firebaseHelper.getUserAddresses(uid)
             val defaultAddress = addresses.find { it.isDefault }
-            address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "No default address set"
+            address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "Chưa có địa chỉ mặc định"
             pendingOrders = firebaseHelper.getPendingOrdersForCleaner(uid)
             services = firebaseHelper.getServices(uid)
             isLoading = false
@@ -97,19 +97,19 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Address: $address", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "Địa chỉ: $address", style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.width(8.dp))
                     IconButton(onClick = { navController.navigate(MyAddress.route) }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_edit),
-                            contentDescription = "Edit Address"
+                            contentDescription = "Chỉnh sửa địa chỉ"
                         )
                     }
                 }
 
                 // Booking Info
                 Text(
-                    text = "My Address is at $address",
+                    text = "Địa chỉ của tôi tại $address",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
@@ -123,11 +123,11 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Requests (${pendingOrders.size})",
+                        text = "Yêu cầu (${pendingOrders.size})",
                         style = MaterialTheme.typography.titleMedium
                     )
                     TextButton(onClick = { navController.navigate(MyJob.route) }) {
-                        Text(text = "All")
+                        Text(text = "Tất cả")
                     }
                 }
 
@@ -152,11 +152,11 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Your Listings",
+                        text = "Danh sách của bạn",
                         style = MaterialTheme.typography.titleMedium
                     )
                     TextButton(onClick = { navController.navigate(AllJobs.route) }) {
-                        Text(text = "All")
+                        Text(text = "Tất cả")
                     }
                 }
 
@@ -182,10 +182,10 @@ fun PendingOrderItem(order: Order, onAction: (String, String) -> Unit) {
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
-        Text(text = "Order from: ${order.userId}", style = MaterialTheme.typography.bodyLarge)
-        Text(text = "Service: ${order.serviceId}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Date: ${order.date}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Address: ${order.address}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Đơn hàng từ: ${order.userId}", style = MaterialTheme.typography.bodyLarge)
+        Text(text = "Dịch vụ: ${order.serviceId}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Ngày: ${order.date}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Địa chỉ: ${order.address}", style = MaterialTheme.typography.bodyMedium)
 
         Row(
             modifier = Modifier
@@ -194,10 +194,10 @@ fun PendingOrderItem(order: Order, onAction: (String, String) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(onClick = { onAction(order.id, "accepted") }) {
-                Text("Accept")
+                Text("Chấp nhận")
             }
             Button(onClick = { onAction(order.id, "cancelled") }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                Text("Reject")
+                Text("Từ chối")
             }
         }
     }

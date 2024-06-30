@@ -44,7 +44,7 @@ fun ServiceCard(navController: NavController, service: Service) {
     var isLiked by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Check if the service is already liked
+    // Kiểm tra nếu dịch vụ đã được thích
     LaunchedEffect(Unit) {
         val likedServices = firebaseHelper.getLikedServices(uid)
         isLiked = likedServices.any { it.id == service.id }
@@ -65,7 +65,7 @@ fun ServiceCard(navController: NavController, service: Service) {
         ) {
             Image(
                 painter = rememberImagePainter(data = service.images.firstOrNull()),
-                contentDescription = "Service Image",
+                contentDescription = "Hình ảnh dịch vụ",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -83,7 +83,7 @@ fun ServiceCard(navController: NavController, service: Service) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = "Rating",
+                        contentDescription = "Đánh giá",
                         tint = Color.Yellow
                     )
                     Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)
@@ -101,7 +101,7 @@ fun ServiceCard(navController: NavController, service: Service) {
             }) {
                 Icon(
                     painter = painterResource(id = if (isLiked) R.drawable.ic_liked else R.drawable.ic_like),
-                    contentDescription = "Like Button"
+                    contentDescription = "Nút thích"
                 )
             }
         }

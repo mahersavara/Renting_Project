@@ -38,10 +38,10 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "My address detail") },
+                title = { Text(text = "Chi tiết địa chỉ của tôi") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -70,7 +70,7 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
                     }
                 }
             }) {
-                Icon(painter = painterResource(id = R.drawable.ic_check), contentDescription = "Save Address")
+                Icon(painter = painterResource(id = R.drawable.ic_check), contentDescription = "Lưu địa chỉ")
             }
         }
     ) {
@@ -82,7 +82,7 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
             OutlinedTextField(
                 value = address.name,
                 onValueChange = { address = address.copy(name = it) },
-                label = { Text("Name") },
+                label = { Text("Tên") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -91,7 +91,7 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
             OutlinedTextField(
                 value = address.phoneNumber,
                 onValueChange = { address = address.copy(phoneNumber = it) },
-                label = { Text("Phone number") },
+                label = { Text("Số điện thoại") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
                     Text(text = "+84 |", modifier = Modifier.padding(end = 8.dp))
@@ -103,7 +103,7 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
             OutlinedTextField(
                 value = address.street,
                 onValueChange = { address = address.copy(street = it) },
-                label = { Text("Location") },
+                label = { Text("Địa chỉ") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -113,7 +113,7 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Default address", modifier = Modifier.weight(1f))
+                Text(text = "Địa chỉ mặc định", modifier = Modifier.weight(1f))
                 Switch(checked = isDefaultAddress, onCheckedChange = { isDefaultAddress = it })
             }
         }

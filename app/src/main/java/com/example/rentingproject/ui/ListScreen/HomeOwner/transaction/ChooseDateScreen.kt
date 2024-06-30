@@ -58,19 +58,19 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Choose Date", style = MaterialTheme.typography.bodyLarge)
+        Text("Chọn ngày", style = MaterialTheme.typography.bodyLarge)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             showDatePicker = true
         }) {
-            Text("Pick Date and Time")
+            Text("Chọn ngày và giờ")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Selected Date: $selectedDate")
+        Text("Ngày đã chọn: $selectedDate")
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -81,7 +81,7 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
                 }
             }
         ) {
-            Text("Next")
+            Text("Tiếp theo")
         }
     }
 }

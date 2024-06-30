@@ -51,10 +51,10 @@ fun MessageScreen(navController: NavController, modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopAppBar(
-                title = { Text("Messages") },
+                title = { Text("Tin nhắn") },
                 actions = {
                     IconButton(onClick = { /* Handle delete action */ }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = "Delete")
+                        Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = "Xóa")
                     }
                 }
             )
@@ -83,13 +83,13 @@ fun ConversationItemView(item: Conversation, navController: NavController, fireb
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
-                navController.navigate(Inbox.createRoute(item.id,item.participants))
+                navController.navigate(Inbox.createRoute(item.id, item.participants))
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = rememberAsyncImagePainter(model = item.avatar),
-            contentDescription = "Avatar",
+            contentDescription = "Ảnh đại diện",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(50.dp)

@@ -54,7 +54,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Login",
+                text = "Đăng nhập",
                 style = MaterialTheme.typography.headlineSmall,
                 fontSize = 24.sp
             )
@@ -62,7 +62,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Please login to continue using the app",
+                text = "Hãy đăng nhập để tiếp tục sử dụng app",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -74,13 +74,13 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
                     emailOrPhone = it
                     isEmailOrPhoneValid = it.isNotEmpty()
                 },
-                label = { Text("Email/phone number") },
+                label = { Text("Email/số điện thoại") },
                 isError = !isEmailOrPhoneValid,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth()
             )
             if (!isEmailOrPhoneValid) {
-                Text(text = "Invalid email or phone number", color = Color.Red, fontSize = 12.sp)
+                Text(text = "Email hoặc số điện thoại không hợp lệ", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -91,7 +91,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
                     password = it
                     isPasswordValid = it.isNotEmpty()
                 },
-                label = { Text("Password") },
+                label = { Text("Mật khẩu") },
                 isError = !isPasswordValid,
                 visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -103,7 +103,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth()
             )
             if (!isPasswordValid) {
-                Text(text = "Invalid password", color = Color.Red, fontSize = 12.sp)
+                Text(text = "Mật khẩu không hợp lệ", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -120,10 +120,10 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
                         checked = rememberPassword,
                         onCheckedChange = { rememberPassword = it }
                     )
-                    Text(text = "Remember password")
+                    Text(text = "Ghi nhớ mật khẩu")
                 }
                 TextButton(onClick = { /* Handle Forgot Password */ }) {
-                    Text(text = "Forgot password?")
+                    Text(text = "Quên mật khẩu?")
                 }
             }
 
@@ -144,7 +144,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
                                         }
                                     }
                                 } else {
-                                    errorMessage = task.exception?.message ?: "Login failed"
+                                    errorMessage = task.exception?.message ?: "Đăng nhập thất bại"
                                 }
                             }
                     } else {
@@ -154,7 +154,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Log in")
+                Text(text = "Đăng nhập")
             }
 
             if (errorMessage.isNotEmpty()) {
@@ -164,7 +164,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = { /* Handle Login with phone number */ }) {
-                Text(text = "Login with phone number")
+                Text(text = "Đăng nhập bằng số điện thoại")
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -184,7 +184,7 @@ fun LoginScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = { navController.navigate(SignUp.route) }) {
-                Text(text = "Don’t have an account? Sign up")
+                Text(text = "Chưa có tài khoản? Đăng ký")
             }
         }
     }

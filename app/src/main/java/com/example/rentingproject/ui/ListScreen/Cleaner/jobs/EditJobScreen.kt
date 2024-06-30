@@ -38,7 +38,7 @@ fun EditJobScreen(navController: NavController, serviceId: String, modifier: Mod
                 }
             }
             .addOnFailureListener { exception ->
-                Timber.tag("EditJobScreen").e(exception, "Error fetching service")
+                Timber.tag("EditJobScreen").e(exception, "Lỗi khi lấy dịch vụ")
             }
     }
 
@@ -51,19 +51,19 @@ fun EditJobScreen(navController: NavController, serviceId: String, modifier: Mod
         }
         imageUris = validUris
         if (validUris.size < uris.size) {
-            Toast.makeText(context, "Some images were not selected because they exceed 1MB", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Một số hình ảnh không được chọn vì vượt quá 1MB", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Images selected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Hình ảnh đã được chọn", Toast.LENGTH_SHORT).show()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Edit (${service.name})") },
+                title = { Text(text = "Chỉnh sửa (${service.name})") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -82,7 +82,7 @@ fun EditJobScreen(navController: NavController, serviceId: String, modifier: Mod
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                    Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Upload Image")
+                    Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Tải lên hình ảnh")
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -90,28 +90,28 @@ fun EditJobScreen(navController: NavController, serviceId: String, modifier: Mod
             OutlinedTextField(
                 value = service.name,
                 onValueChange = { service = service.copy(name = it) },
-                label = { Text("Service Name") },
+                label = { Text("Tên dịch vụ") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = service.price,
                 onValueChange = { service = service.copy(price = it) },
-                label = { Text("Price Range") },
+                label = { Text("Giá cả") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = service.location,
                 onValueChange = { service = service.copy(location = it) },
-                label = { Text("Location") },
+                label = { Text("Địa điểm") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = service.description,
                 onValueChange = { service = service.copy(description = it) },
-                label = { Text("Description") },
+                label = { Text("Mô tả") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -124,16 +124,16 @@ fun EditJobScreen(navController: NavController, serviceId: String, modifier: Mod
                     onClick = {
                         firebaseHelper.deleteService(service.id) { success ->
                             if (success) {
-                                Toast.makeText(context, "Service deleted successfully", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Xóa dịch vụ thành công", Toast.LENGTH_SHORT).show()
                                 navController.popBackStack()
                             } else {
-                                Toast.makeText(context, "Failed to delete service", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Xóa dịch vụ thất bại", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
-                    Text(text = "Delete")
+                    Text(text = "Xóa")
                 }
                 Button(
                     onClick = {
@@ -147,31 +147,31 @@ fun EditJobScreen(navController: NavController, serviceId: String, modifier: Mod
                                             service = service.copy(images = service.images + uploadedImageUrls)
                                             firebaseHelper.editService(service) { success ->
                                                 if (success) {
-                                                    Toast.makeText(context, "Service updated successfully", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, "Cập nhật dịch vụ thành công", Toast.LENGTH_SHORT).show()
                                                     navController.popBackStack()
                                                 } else {
-                                                    Toast.makeText(context, "Failed to update service", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, "Cập nhật dịch vụ thất bại", Toast.LENGTH_SHORT).show()
                                                 }
                                             }
                                         }
                                     } else {
-                                        Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "Tải lên hình ảnh thất bại", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
                         } else {
                             firebaseHelper.editService(service) { success ->
                                 if (success) {
-                                    Toast.makeText(context, "Service updated successfully", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Cập nhật dịch vụ thành công", Toast.LENGTH_SHORT).show()
                                     navController.popBackStack()
                                 } else {
-                                    Toast.makeText(context, "Failed to update service", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Cập nhật dịch vụ thất bại", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
                     }
                 ) {
-                    Text(text = "Save")
+                    Text(text = "Lưu")
                 }
             }
         }

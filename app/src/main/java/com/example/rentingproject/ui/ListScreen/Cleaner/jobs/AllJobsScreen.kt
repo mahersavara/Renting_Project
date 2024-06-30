@@ -57,20 +57,20 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Your Listings") },
+                title = { Text(text = "Danh sách của bạn") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = AllJobs.route,userRole=userRole)
+            BottomNavigationBar(navController = navController, currentRoute = AllJobs.route, userRole = userRole)
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate(PostJob.route) }) {
-                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add")
+                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Thêm")
             }
         }
     ) {
@@ -91,4 +91,3 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
         }
     }
 }
-

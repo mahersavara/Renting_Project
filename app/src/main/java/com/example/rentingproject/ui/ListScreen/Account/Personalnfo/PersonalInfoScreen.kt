@@ -1,4 +1,4 @@
-package com.example.rentingproject.ui.ListScreen.Account.Personalnfo
+package com.example.rentingproject.ui.ListScreen.Account.PersonalInfo
 
 import android.net.Uri
 import android.os.Build
@@ -50,7 +50,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
     var gender by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
     var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
-    val genderOptions = listOf("Male", "Female")
+    val genderOptions = listOf("Nam", "Nữ")
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -59,10 +59,9 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             val fileSize = context.contentResolver.openInputStream(it)?.available() ?: 0
             if (fileSize < 1024 * 1024) {
                 profilePictureUri = it
-                Toast.makeText(context, "Image uploaded successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Tải ảnh lên thành công", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Image size should be less than 1MB", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(context, "Kích thước ảnh phải nhỏ hơn 1MB", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -81,11 +80,11 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                         profilePictureUri =
                             document.getString("profilePicture")?.let { Uri.parse(it) }
                     } else {
-                        Timber.tag("PersonalInfoScreen").d("No such document")
+                        Timber.tag("PersonalInfoScreen").d("Không có tài liệu nào như vậy")
                     }
                 }
                 .addOnFailureListener { exception ->
-                    Timber.tag("PersonalInfoScreen").e(exception, "get failed with ")
+                    Timber.tag("PersonalInfoScreen").e(exception, "Lỗi khi lấy tài liệu")
                 }
         }
     }
@@ -105,12 +104,12 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopAppBar(
-                title = { Text("Personal Info") },
+                title = { Text("Thông tin cá nhân") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back"
+                            contentDescription = "Quay lại"
                         )
                     }
                 }
@@ -121,7 +120,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             if (profilePictureUri != null) {
                 Image(
                     painter = rememberImagePainter(profilePictureUri),
-                    contentDescription = "Profile Picture",
+                    contentDescription = "Ảnh đại diện",
                     modifier = Modifier
                         .size(100.dp)
                         .clickable {
@@ -131,7 +130,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             } else {
                 Image(
                     painter = painterResource(id = R.drawable.ic_me),
-                    contentDescription = "Profile Picture",
+                    contentDescription = "Ảnh đại diện",
                     modifier = Modifier
                         .size(100.dp)
                         .clickable {
@@ -145,7 +144,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text("Tên") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -170,7 +169,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
-                    label = { Text("Phone Number") },
+                    label = { Text("Số điện thoại") },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -187,7 +186,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                 OutlinedTextField(
                     value = gender,
                     onValueChange = { gender = it },
-                    label = { Text("Gender") },
+                    label = { Text("Giới tính") },
                     readOnly = true,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -220,10 +219,10 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                 OutlinedTextField(
                     value = birthday,
                     onValueChange = { },
-                    label = { Text("Birthday") },
+                    label = { Text("Ngày sinh") },
                     readOnly = true,
                     trailingIcon = {
-                        Icon(painter = painterResource(id = R.drawable.ic_booking), contentDescription = "Select Date")
+                        Icon(painter = painterResource(id = R.drawable.ic_booking), contentDescription = "Chọn ngày")
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -244,7 +243,7 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                     )
                     userDocRef.update(updates)
                         .addOnSuccessListener {
-                            Timber.tag("PersonalInfoScreen").d("User profile updated")
+                            Timber.tag("PersonalInfoScreen").d("Cập nhật hồ sơ người dùng thành công")
                             if (profilePictureUri != null) {
                                 firebaseHelper.uploadProfilePicture(
                                     user.uid,
@@ -253,13 +252,13 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                                     if (uri != null) {
                                         Toast.makeText(
                                             context,
-                                            "Profile updated successfully",
+                                            "Cập nhật hồ sơ thành công",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "Failed to upload profile picture",
+                                            "Không thể tải ảnh đại diện lên",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -267,27 +266,27 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                             } else {
                                 Toast.makeText(
                                     context,
-                                    "Profile updated successfully",
+                                    "Cập nhật hồ sơ thành công",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
                         }
                         .addOnFailureListener { exception ->
                             Timber.tag("PersonalInfoScreen")
-                                .e(exception, "Failed to update profile")
-                            Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT)
+                                .e(exception, "Không thể cập nhật hồ sơ")
+                            Toast.makeText(context, "Không thể cập nhật hồ sơ", Toast.LENGTH_SHORT)
                                 .show()
                         }
                 }
             }, modifier = Modifier.fillMaxWidth()) {
-                Text("Save")
+                Text("Lưu")
             }
         }
     }
 
     MaterialDialog(dialogState = dialogState, buttons = {
         positiveButton("OK")
-        negativeButton("Cancel")
+        negativeButton("Hủy")
     }) {
         datepicker { date ->
             birthday = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -308,7 +307,7 @@ fun CountryCodePicker(selectedCountryCode: String, onCountryCodeSelected: (Strin
         OutlinedTextField(
             value = selectedCountryCode,
             onValueChange = { },
-            label = { Text("Country Code") },
+            label = { Text("Mã quốc gia") },
             readOnly = true,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)

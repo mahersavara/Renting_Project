@@ -49,10 +49,10 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Service Details") },
+                title = { Text(text = "Chi tiết dịch vụ") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 },
                 actions = {
@@ -68,7 +68,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                     }) {
                         Icon(
                             painter = painterResource(id = if (isLiked) R.drawable.ic_liked else R.drawable.ic_like),
-                            contentDescription = "Like Button"
+                            contentDescription = "Nút yêu thích"
                         )
                     }
                 }
@@ -83,7 +83,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
             ) {
                 Image(
                     painter = rememberImagePainter(data = it.images.firstOrNull()),
-                    contentDescription = "Service Image",
+                    contentDescription = "Hình ảnh dịch vụ",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(240.dp)
@@ -95,7 +95,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Location: ${it.location}",
+                    text = "Địa điểm: ${it.location}",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
@@ -107,7 +107,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = "Rating",
+                        contentDescription = "Đánh giá",
                         tint = Color.Yellow
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -115,7 +115,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Description",
+                    text = "Mô tả",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -128,7 +128,7 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                     onClick = { navController.navigate("chooseDate/${it.id}") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Book now")
+                    Text(text = "Đặt ngay")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
@@ -136,16 +136,16 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                         coroutineScope.launch {
                             val participants = listOf(it.userId, uid)
                             val conversationId = firebaseHelper.getOrCreateConversationId(participants)
-                            navController.navigate(Inbox.createRoute(conversationId, participants)) // Navigate to chat screen
+                            navController.navigate(Inbox.createRoute(conversationId, participants)) // Điều hướng đến màn hình chat
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Chat with Cleaner")
+                    Text(text = "Trò chuyện với nhân viên dọn dẹp")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Reviews",
+                    text = "Đánh giá",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -179,7 +179,7 @@ fun ReviewCard(review: Review) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = rememberImagePainter(data = review.userImage),
-                    contentDescription = "User Image",
+                    contentDescription = "Hình ảnh người dùng",
                     modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))

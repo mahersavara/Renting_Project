@@ -32,7 +32,7 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = Account.route
     val firebaseHelper = FirebaseHelper()
     var userRole by remember { mutableStateOf<String?>(null) }
-    var userName by remember { mutableStateOf("Edit DefaultName") }
+    var userName by remember { mutableStateOf("Chỉnh sửa tên mặc định") }
     var userPhoneNumber by remember { mutableStateOf("+84900989278") }
     var userProfilePicture by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
@@ -47,7 +47,7 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
             userDocRef.get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        userName = document.getString("name") ?: "Edit DefaultName"
+                        userName = document.getString("name") ?: "Chỉnh sửa tên mặc định"
                         userPhoneNumber = document.getString("phoneNumber") ?: "+84900989278"
                         userProfilePicture = document.getString("profilePicture")?.let { Uri.parse(it) }
                     } else {
@@ -79,13 +79,13 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
                 if (userProfilePicture != null) {
                     Image(
                         painter = rememberImagePainter(userProfilePicture),
-                        contentDescription = "Profile Picture",
+                        contentDescription = "Hình đại diện",
                         modifier = Modifier.size(64.dp)
                     )
                 } else {
                     Image(
                         painter = painterResource(id = R.drawable.ic_me),
-                        contentDescription = "Profile Picture",
+                        contentDescription = "Hình đại diện",
                         modifier = Modifier.size(64.dp)
                     )
                 }
@@ -97,7 +97,7 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.width(16.dp))
                 Image(
                     painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = "Edit Profile",
+                    contentDescription = "Chỉnh sửa hồ sơ",
                     modifier = Modifier
                         .size(64.dp)
                         .clickable {
@@ -117,9 +117,9 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Verify your email for enhanced account protection.", modifier = Modifier.weight(1f))
-                    Button(onClick = { /* Handle Email Verification */ }) {
-                        Text("Verify")
+                    Text("Xác minh email của bạn để bảo vệ tài khoản tốt hơn.", modifier = Modifier.weight(1f))
+                    Button(onClick = { /* Xử lý xác minh email */ }) {
+                        Text("Xác minh")
                     }
                 }
             }
@@ -127,12 +127,12 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (userRole == "HomeOwner") {
-                ListItem("Transaction history", id = R.drawable.ic_trans_history, navController = navController, route = TransactionHistory.route)
+                ListItem("Lịch sử giao dịch", id = R.drawable.ic_trans_history, navController = navController, route = TransactionHistory.route)
             }
 
-            ListItem("Privacy & Security", id = R.drawable.ic_privacy, navController = navController)
-            ListItem("Payment Method", id = R.drawable.ic_payment_method, navController = navController, route = payment.route)
-            ListItem("Address", id = R.drawable.ic_address, navController = navController, route = MyAddress.route)
+            ListItem("Quyền riêng tư & Bảo mật", id = R.drawable.ic_privacy, navController = navController)
+            ListItem("Phương thức thanh toán", id = R.drawable.ic_payment_method, navController = navController, route = payment.route)
+            ListItem("Địa chỉ", id = R.drawable.ic_address, navController = navController, route = MyAddress.route)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -145,7 +145,7 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Log out")
+                Text("Đăng xuất")
             }
 
             Spacer(modifier = Modifier.weight(1f))

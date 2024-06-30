@@ -16,15 +16,15 @@ import com.example.rentingproject.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentMethodScreen(navController: NavController, modifier: Modifier = Modifier) {
-    var selectedMethod by remember { mutableStateOf("Cash") }
+    var selectedMethod by remember { mutableStateOf("Tiền mặt") }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Payment method") },
+                title = { Text(text = "Phương thức thanh toán") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -36,7 +36,7 @@ fun PaymentMethodScreen(navController: NavController, modifier: Modifier = Modif
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(text = "Confirm")
+                Text(text = "Xác nhận")
             }
         }
     ) {
@@ -47,9 +47,9 @@ fun PaymentMethodScreen(navController: NavController, modifier: Modifier = Modif
         ) {
             PaymentMethodItem(
                 icon = R.drawable.ic_cash,
-                label = "Cash",
-                selected = selectedMethod == "Cash",
-                onSelect = { selectedMethod = "Cash" }
+                label = "Tiền mặt",
+                selected = selectedMethod == "Tiền mặt",
+                onSelect = { selectedMethod = "Tiền mặt" }
             )
         }
     }

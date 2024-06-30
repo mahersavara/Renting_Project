@@ -29,30 +29,29 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-
 @Composable
 fun SplashScreen(navController: NavController, dataStoreHelper: DataStoreHelper) {
     val scope = rememberCoroutineScope()
     var isFirstTime by remember { mutableStateOf(true) }
     LaunchedEffect(key1 = true) {
         //fix bug
-        Timber.tag("AAAAA").d("SplashScreen: 0")
+        Timber.tag("AAAAA").d("Màn hình Splash: 0")
         scope.launch {
             dataStoreHelper.isFirstTime.collect { firstTime ->
                 isFirstTime = firstTime
             }
         }
         delay(3000) // Delay for 3 seconds
-        Timber.tag("AAAAA").d("SplashScreen: 0.5")
+        Timber.tag("AAAAA").d("Màn hình Splash: 0.5")
         if (isFirstTime) {
             navController.navigate(IntroduceScreen.route) {
-                //TODO CHECK BUGS OF THIS ONE
-                Timber.tag("AAAAA").d("SplashScreen: 1")
+                //TODO KIỂM TRA LỖI CỦA ĐIỀU NÀY
+                Timber.tag("AAAAA").d("Màn hình Splash: 1")
                 popUpTo(SplashScreen.route) { inclusive = true }
             }
             dataStoreHelper.setFirstTime(false)
         } else {
-            Timber.tag("AAAAA").d("SplashScreen: 2")
+            Timber.tag("AAAAA").d("Màn hình Splash: 2")
             // Later for checking in the firebase if having firebase
             // Coding your own project, mixing with internet, not clone from A sample Project in Internet
             navController.navigate(Login.route) {
@@ -69,7 +68,7 @@ fun SplashScreen(navController: NavController, dataStoreHelper: DataStoreHelper)
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Splash Logo",
+            contentDescription = "Logo Splash",
             modifier = Modifier
                 .wrapContentSize()
                 .scale(3f)

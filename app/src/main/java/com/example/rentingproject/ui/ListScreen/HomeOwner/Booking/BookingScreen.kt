@@ -57,10 +57,10 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Booking") },
+                title = { Text(text = "Đặt chỗ") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -103,6 +103,10 @@ fun MonthlyCalendarView(
 ) {
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfMonth = currentMonth.atDay(1).dayOfWeek.value
+    val vietnameseMonths = listOf(
+        "Tháng Một", "Tháng Hai", "Tháng Ba", "Tháng Tư", "Tháng Năm", "Tháng Sáu",
+        "Tháng Bảy", "Tháng Tám", "Tháng Chín", "Tháng Mười", "Tháng Mười Một", "Tháng Mười Hai"
+    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -111,21 +115,21 @@ fun MonthlyCalendarView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { onMonthChanged(currentMonth.minusMonths(1)) }) {
-                Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Previous Month")
+                Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Tháng trước")
             }
             Text(
-                text = "${currentMonth.month.name.lowercase().capitalize()} ${currentMonth.year}",
+                text = "${vietnameseMonths[currentMonth.month.value - 1]} ${currentMonth.year}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = { onMonthChanged(currentMonth.plusMonths(1)) }) {
-                Icon(painter = painterResource(id = R.drawable.ic_forward), contentDescription = "Next Month")
+                Icon(painter = painterResource(id = R.drawable.ic_forward), contentDescription = "Tháng sau")
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Column {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEach { day ->
+                listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
                     Text(
                         text = day,
                         modifier = Modifier.weight(1f),
@@ -183,7 +187,7 @@ fun BookingList(selectedDate: LocalDate, bookings: List<Order>) {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "No plan has been made yet")
+            Text(text = "Chưa có kế hoạch nào được lên lịch")
         }
     } else {
         LazyColumn {
@@ -207,7 +211,7 @@ fun BookingItem(booking: Order) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Pickup Location: ${booking.address}",
+            text = "Địa điểm đón: ${booking.address}",
             style = MaterialTheme.typography.bodySmall
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -219,14 +223,12 @@ fun BookingItem(booking: Order) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(onClick = { /* Handle Cancel */ }) {
-                Icon(painter = painterResource(id = R.drawable.ic_cancel), contentDescription = "Cancel")
+                Icon(painter = painterResource(id = R.drawable.ic_cancel), contentDescription = "Hủy")
             }
         }
         Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
     }
 }
-
-
 
 suspend fun FirebaseHelper.getAcceptedOrders(uid: String, isHomeOwner: Boolean): List<Order> {
     Timber.d("Fetching accepted orders for user with uid: $uid")
@@ -268,4 +270,3 @@ suspend fun FirebaseHelper.getAcceptedOrders(uid: String, isHomeOwner: Boolean):
         emptyList()
     }
 }
-

@@ -1,4 +1,3 @@
-// DeliveryAddressScreen.kt
 package com.example.rentingproject.ui.ListScreen.HomeOwner.transaction
 
 import androidx.compose.foundation.clickable
@@ -38,17 +37,17 @@ fun DeliveryAddressScreen(navController: NavController, serviceId: String, date:
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Select Address") },
+                title = { Text(text = "Chọn địa chỉ") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate("${MyAddressDetail.route}/new") }) {
-                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add new address")
+                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Thêm địa chỉ mới")
             }
         }
     ) {

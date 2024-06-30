@@ -62,7 +62,7 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                 filteredServices = allServices
                 lastVisibleService = newServicesWithSnapshots.last().second
             } else {
-                Toast.makeText(context, "That's all items", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đã tải hết các mục", Toast.LENGTH_SHORT).show()
             }
             isLoading = false
         }
@@ -73,7 +73,7 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
             val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
             val addresses = firebaseHelper.getUserAddresses(uid)
             val defaultAddress = addresses.find { it.isDefault }
-            address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "No default address set"
+            address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "Chưa có địa chỉ mặc định"
             loadMoreServices()
         }
     }
@@ -128,19 +128,19 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Address: $address", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Địa chỉ: $address", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(onClick = { navController.navigate(MyAddress.route) }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = "Edit Address"
+                        contentDescription = "Chỉnh sửa địa chỉ"
                     )
                 }
             }
 
             // Booking Info
             Text(
-                text = "Book A Cleaning for your House at: $address",
+                text = "Đặt lịch dọn dẹp cho nhà bạn tại: $address",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -149,11 +149,11 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Search") },
+                label = { Text("Tìm kiếm") },
                 leadingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Search"
+                        contentDescription = "Tìm kiếm"
                     )
                 },
                 modifier = Modifier
@@ -163,7 +163,7 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
 
             // Services Section
             Text(
-                text = "Available Services",
+                text = "Các dịch vụ có sẵn",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -187,4 +187,3 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
         }
     }
 }
-

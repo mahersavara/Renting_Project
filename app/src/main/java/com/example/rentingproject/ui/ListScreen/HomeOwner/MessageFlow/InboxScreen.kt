@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InboxScreen(navController: NavController, conversationId: String, participants: List<String>, modifier: Modifier = Modifier) {
@@ -70,10 +71,10 @@ fun InboxScreen(navController: NavController, conversationId: String, participan
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopAppBar(
-                title = { Text("Conversation") },
+                title = { Text("Cuộc trò chuyện") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -101,7 +102,7 @@ fun InboxScreen(navController: NavController, conversationId: String, participan
                 OutlinedTextField(
                     value = messageText,
                     onValueChange = { messageText = it },
-                    label = { Text("Say something") },
+                    label = { Text("Nói gì đó") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(
@@ -125,7 +126,7 @@ fun InboxScreen(navController: NavController, conversationId: String, participan
                         }
                     }
                 }) {
-                    Icon(Icons.Filled.Send, contentDescription = "Send")
+                    Icon(Icons.Filled.Send, contentDescription = "Gửi")
                 }
             }
         }
@@ -136,12 +137,12 @@ fun InboxScreen(navController: NavController, conversationId: String, participan
 fun MessageItemView(message: Message, currentUserId: String) {
     val isOwnMessage = message.sender == currentUserId
     var avatarUrl by remember { mutableStateOf("") }
-    var userName by remember { mutableStateOf("Anonymous User") }
+    var userName by remember { mutableStateOf("Người dùng ẩn danh") }
 
     LaunchedEffect(message.sender) {
         val userDoc = FirebaseFirestore.getInstance().collection("users").document(message.sender).get().await()
         avatarUrl = userDoc.getString("profilePicture").orEmpty()
-        userName = userDoc.getString("name").orEmpty().ifBlank { "Anonymous User" }
+        userName = userDoc.getString("name").orEmpty().ifBlank { "Người dùng ẩn danh" }
     }
 
     Row(
@@ -153,7 +154,7 @@ fun MessageItemView(message: Message, currentUserId: String) {
         if (!isOwnMessage) {
             Image(
                 painter = rememberAsyncImagePainter(model = avatarUrl),
-                contentDescription = "Avatar",
+                contentDescription = "Ảnh đại diện",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(40.dp)

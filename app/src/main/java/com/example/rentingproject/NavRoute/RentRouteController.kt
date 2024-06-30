@@ -19,7 +19,6 @@ import com.example.rentingproject.ui.ListScreen.Account.LeaveReview.LeaveReviewS
 import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressDetailScreen
 import com.example.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressScreen
 import com.example.rentingproject.ui.ListScreen.Account.Payment.PaymentMethodScreen
-import com.example.rentingproject.ui.ListScreen.Account.Personalnfo.PersonalInfoScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.AllJobsScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.EditJobScreen
 import com.example.rentingproject.ui.ListScreen.Cleaner.jobs.PostJobScreen
@@ -31,6 +30,7 @@ import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.MessageScr
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.ServiceDetailScreen
 import com.example.rentingproject.ui.ListScreen.IntroduceScreen.IntroduceScreen
 import com.example.rentingproject.ui.ListScreen.Account.LoginScreen.LoginScreen
+import com.example.rentingproject.ui.ListScreen.Account.PersonalInfo.PersonalInfoScreen
 import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
 import com.example.rentingproject.ui.ListScreen.Account.RegisterScreen.SignUpScreen
 import com.example.rentingproject.ui.ListScreen.Account.TransactionHistory.TransactionHistoryScreen

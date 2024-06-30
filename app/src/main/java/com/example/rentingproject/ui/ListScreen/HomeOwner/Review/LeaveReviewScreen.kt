@@ -32,10 +32,10 @@ fun LeaveReviewScreen(navController: NavController, orderId: String, modifier: M
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Leave a Review") },
+                title = { Text(text = "Đánh giá dịch vụ") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -52,16 +52,16 @@ fun LeaveReviewScreen(navController: NavController, orderId: String, modifier: M
                         CircularProgressIndicator()
                     }
                 } else if (isSubmitted) {
-                    Text("Thank you for your review!", style = MaterialTheme.typography.bodyLarge)
+                    Text("Cảm ơn bạn đã đánh giá!", style = MaterialTheme.typography.bodyLarge)
                 } else {
-                    Text(text = "Rating", style = MaterialTheme.typography.titleMedium)
+                    Text(text = "Đánh giá", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     RatingBar(rating = rating, onRatingChanged = { newRating -> rating = newRating })
                     Spacer(modifier = Modifier.height(16.dp))
                     TextField(
                         value = reviewText,
                         onValueChange = { reviewText = it },
-                        label = { Text("Write a review") },
+                        label = { Text("Viết đánh giá") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -79,7 +79,7 @@ fun LeaveReviewScreen(navController: NavController, orderId: String, modifier: M
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Submit Review")
+                        Text("Gửi đánh giá")
                     }
                 }
             }
@@ -96,7 +96,7 @@ fun RatingBar(rating: Int, onRatingChanged: (Int) -> Unit) {
         for (i in 1..5) {
             Icon(
                 painter = painterResource(id = if (i <= rating) R.drawable.ic_star_filled else R.drawable.ic_star_outline),
-                contentDescription = "Star $i",
+                contentDescription = "Ngôi sao $i",
                 modifier = Modifier
                     .size(32.dp)
                     .clickable { onRatingChanged(i) }

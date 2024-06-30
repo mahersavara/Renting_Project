@@ -56,7 +56,7 @@ fun SignUpScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Create account",
+                text = "Tạo tài khoản",
                 style = MaterialTheme.typography.headlineSmall,
                 fontSize = 24.sp
             )
@@ -64,7 +64,7 @@ fun SignUpScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Please fill the details to create account",
+                text = "Vui lòng điền chi tiết để tạo tài khoản",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -82,7 +82,7 @@ fun SignUpScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
             if (!isEmailValid) {
-                Text(text = "Invalid email", color = Color.Red, fontSize = 12.sp)
+                Text(text = "Email không hợp lệ", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -93,13 +93,13 @@ fun SignUpScreen(navController: NavController) {
                     phoneNumber = it
                     isPhoneNumberValid = it.length >= 10
                 },
-                label = { Text("Phone number") },
+                label = { Text("Số điện thoại") },
                 isError = !isPhoneNumberValid,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.fillMaxWidth()
             )
             if (!isPhoneNumberValid) {
-                Text(text = "Invalid phone number", color = Color.Red, fontSize = 12.sp)
+                Text(text = "Số điện thoại không hợp lệ", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -111,7 +111,7 @@ fun SignUpScreen(navController: NavController) {
                     isPasswordValid = it.any { char -> char.isLetterOrDigit() }
                     isRepeatPasswordValid = it == repeatPassword
                 },
-                label = { Text("Password") },
+                label = { Text("Mật khẩu") },
                 isError = !isPasswordValid,
                 visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -123,7 +123,7 @@ fun SignUpScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
             if (!isPasswordValid) {
-                Text(text = "Password must have at least one special character", color = Color.Red, fontSize = 12.sp)
+                Text(text = "Mật khẩu phải có ít nhất một ký tự đặc biệt", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -134,7 +134,7 @@ fun SignUpScreen(navController: NavController) {
                     repeatPassword = it
                     isRepeatPasswordValid = it == password
                 },
-                label = { Text("Repeat Password") },
+                label = { Text("Nhập lại mật khẩu") },
                 isError = !isRepeatPasswordValid,
                 visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -146,7 +146,7 @@ fun SignUpScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
             if (!isRepeatPasswordValid) {
-                Text(text = "Passwords do not match", color = Color.Red, fontSize = 12.sp)
+                Text(text = "Mật khẩu không khớp", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -164,17 +164,17 @@ fun SignUpScreen(navController: NavController) {
                                                 popUpTo(Login.route) { inclusive = true }
                                             }
                                         } else {
-                                            errorMessage = "Failed to set user role"
+                                            errorMessage = "Không thể đặt vai trò người dùng"
                                         }
                                     }
                                 }
                             } else {
-                                errorMessage = message ?: "Registration failed"
+                                errorMessage = message ?: "Đăng ký không thành công"
                             }
                         }
                     }
                 }) {
-                    Text(text = "Homeowner Sign Up")
+                    Text(text = "Đăng ký Chủ nhà")
                 }
 
                 Button(onClick = {
@@ -189,17 +189,17 @@ fun SignUpScreen(navController: NavController) {
                                                 popUpTo(Login.route) { inclusive = true }
                                             }
                                         } else {
-                                            errorMessage = "Failed to set user role"
+                                            errorMessage = "Không thể đặt vai trò người dùng"
                                         }
                                     }
                                 }
                             } else {
-                                errorMessage = message ?: "Registration failed"
+                                errorMessage = message ?: "Đăng ký không thành công"
                             }
                         }
                     }
                 }) {
-                    Text(text = "Cleaner Sign Up")
+                    Text(text = "Đăng ký Dọn dẹp")
                 }
             }
 
@@ -207,12 +207,12 @@ fun SignUpScreen(navController: NavController) {
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = { /* Handle Google Sign Up */
-                    //TODO need analyze for an alert dialog choosing
+                    //TODO cần phân tích cho một hộp thoại cảnh báo chọn lựa
                 }) {
                     Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = null, modifier = Modifier.size(40.dp))
                 }
                 IconButton(onClick = { /* Handle Facebook Sign Up */
-                    //TODO need analyze for an alert dialog choosing
+                    //TODO cần phân tích cho một hộp thoại cảnh báo chọn lựa
                 }) {
                     Icon(painter = painterResource(id = R.drawable.ic_facebook), contentDescription = null, modifier = Modifier.size(40.dp))
                 }
@@ -221,7 +221,7 @@ fun SignUpScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = { navController.navigate(Login.route) }) {
-                Text(text = "Already have an account? Login")
+                Text(text = "Đã có tài khoản? Đăng nhập")
             }
 
             if (errorMessage.isNotEmpty()) {

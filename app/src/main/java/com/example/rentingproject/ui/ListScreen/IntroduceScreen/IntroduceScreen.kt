@@ -45,7 +45,7 @@ import com.example.rentingproject.NavRoute.SignUp
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun IntroduceScreen(navController: NavController, modifier: Modifier =Modifier) {
+fun IntroduceScreen(navController: NavController, modifier: Modifier = Modifier) {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
 
@@ -57,17 +57,17 @@ fun IntroduceScreen(navController: NavController, modifier: Modifier =Modifier) 
             when (page) {
                 0 -> OnboardingPage(
                     imageRes = R.drawable.onboarding_1,
-                    title = "Welcome to Home Clean!",
+                    title = "Chào mừng đến với Home Clean!",
                     description = "ABC XYZ"
                 )
                 1 -> OnboardingPage(
                     imageRes = R.drawable.onboarding_2,
-                    title = "Care for Your House",
+                    title = "Chăm sóc ngôi nhà của bạn",
                     description = "ABC XYZ"
                 )
                 2 -> OnboardingPage(
                     imageRes = R.drawable.onboarding_3,
-                    title = "Booking and Communication",
+                    title = "Đặt chỗ và giao tiếp",
                     description = "ABC XYZ",
                     showButtons = true,
                     onLoginClicked = {
@@ -95,7 +95,7 @@ fun IntroduceScreen(navController: NavController, modifier: Modifier =Modifier) 
                     popUpTo(IntroduceScreen.route) { inclusive = true }
                 }
             }) {
-                Text("Skip")
+                Text("Bỏ qua")
             }
 
             Button(onClick = {
@@ -103,13 +103,11 @@ fun IntroduceScreen(navController: NavController, modifier: Modifier =Modifier) 
                     pagerState.scrollToPage(pagerState.currentPage + 1)
                 }
             }) {
-                Text("Next")
+                Text("Tiếp theo")
             }
         }
     }
 }
-
-
 
 @Composable
 fun OnboardingPage(
@@ -147,11 +145,11 @@ fun OnboardingPage(
         if (showButtons) {
             Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = onLoginClicked) {
-                Text("Login")
+                Text("Đăng nhập")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onSignUpClicked) {
-                Text("Sign up")
+                Text("Đăng ký")
             }
         }
     }

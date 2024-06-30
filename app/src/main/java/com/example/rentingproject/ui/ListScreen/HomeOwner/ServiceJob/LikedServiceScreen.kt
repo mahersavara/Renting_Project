@@ -43,12 +43,12 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Liked") },
+                title = { Text(text = "Yêu thích") },
                 actions = {
                     IconButton(onClick = { /* Handle Filter */ }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_filter),
-                            contentDescription = "Filter"
+                            contentDescription = "Lọc"
                         )
                     }
                 }
@@ -94,8 +94,8 @@ fun LikedServiceCard(service: Service) {
                 .padding(8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Replace with actual service image
-                contentDescription = "Service Image",
+                painter = painterResource(id = R.drawable.cleaner_sample), // Thay bằng hình ảnh dịch vụ thực tế
+                contentDescription = "Hình ảnh dịch vụ",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -113,7 +113,7 @@ fun LikedServiceCard(service: Service) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = "Rating",
+                        contentDescription = "Đánh giá",
                         tint = Color.Yellow
                     )
                     Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)

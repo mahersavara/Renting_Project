@@ -36,17 +36,17 @@ fun MyAddressScreen(navController: NavController, modifier: Modifier = Modifier)
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "My address") },
+                title = { Text(text = "Địa chỉ của tôi") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate("${MyAddressDetail.route}/new") }) {
-                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add new address")
+                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Thêm địa chỉ mới")
             }
         }
     ) {
@@ -91,9 +91,9 @@ fun AddressItem(navController: NavController, address: Address, onDelete: () -> 
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (address.isDefault) {
-                Icon(painter = painterResource(id = R.drawable.ic_default), contentDescription = "Default Address", tint = Color.Green)
+                Icon(painter = painterResource(id = R.drawable.ic_default), contentDescription = "Địa chỉ mặc định", tint = Color.Green)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Default", color = Color.Green, fontSize = 12.sp)
+                Text(text = "Mặc định", color = Color.Green, fontSize = 12.sp)
             } else {
                 IconButton(onClick = {
                     coroutineScope.launch {
@@ -104,12 +104,12 @@ fun AddressItem(navController: NavController, address: Address, onDelete: () -> 
                         }
                     }
                 }) {
-                    Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = "Delete Address", tint = Color.Red)
+                    Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = "Xóa địa chỉ", tint = Color.Red)
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = { navController.navigate("${MyAddressDetail.route}/${address.id}") }) {
-                Icon(painter = painterResource(id = R.drawable.ic_edit), contentDescription = "Edit Address")
+                Icon(painter = painterResource(id = R.drawable.ic_edit), contentDescription = "Chỉnh sửa địa chỉ")
             }
         }
         Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))

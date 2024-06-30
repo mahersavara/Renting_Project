@@ -41,19 +41,19 @@ fun PostJobScreen(navController: NavController, modifier: Modifier = Modifier) {
         }
         imageUris = validUris
         if (validUris.size < uris.size) {
-            Toast.makeText(context, "Some images were not selected because they exceed 1MB", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Một số hình ảnh không được chọn vì vượt quá 1MB", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Images selected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Hình ảnh đã được chọn", Toast.LENGTH_SHORT).show()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Post a new Service") },
+                title = { Text(text = "Đăng dịch vụ mới") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -72,7 +72,7 @@ fun PostJobScreen(navController: NavController, modifier: Modifier = Modifier) {
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                    Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Upload Image")
+                    Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Tải lên hình ảnh")
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -80,28 +80,28 @@ fun PostJobScreen(navController: NavController, modifier: Modifier = Modifier) {
             OutlinedTextField(
                 value = serviceName,
                 onValueChange = { serviceName = it },
-                label = { Text("Service Name") },
+                label = { Text("Tên dịch vụ") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = priceRange,
                 onValueChange = { priceRange = it },
-                label = { Text("Price Range") },
+                label = { Text("Khoảng giá") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = location,
                 onValueChange = { location = it },
-                label = { Text("Location") },
+                label = { Text("Địa điểm") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description") },
+                label = { Text("Mô tả") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -124,25 +124,25 @@ fun PostJobScreen(navController: NavController, modifier: Modifier = Modifier) {
                                         )
                                         firebaseHelper.postService(service) { success ->
                                             if (success) {
-                                                Toast.makeText(context, "Service posted successfully", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, "Đăng dịch vụ thành công", Toast.LENGTH_SHORT).show()
                                                 navController.popBackStack()
                                             } else {
-                                                Toast.makeText(context, "Failed to post service", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, "Đăng dịch vụ thất bại", Toast.LENGTH_SHORT).show()
                                             }
                                         }
                                     }
                                 } else {
-                                    Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Tải lên hình ảnh thất bại", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
                     } else {
-                        Toast.makeText(context, "Please select at least one image", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Vui lòng chọn ít nhất một hình ảnh", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Save")
+                Text(text = "Lưu")
             }
         }
     }

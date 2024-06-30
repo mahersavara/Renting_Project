@@ -18,6 +18,7 @@ import com.example.rentingproject.R
 import com.example.rentingproject.utils.FirebaseHelper
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,10 +31,10 @@ fun PaymentScreen(navController: NavController, serviceId: String, date: String,
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Payment Method") },
+                title = { Text(text = "Phương thức thanh toán") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -45,12 +46,12 @@ fun PaymentScreen(navController: NavController, serviceId: String, date: String,
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Select Payment Method", style = MaterialTheme.typography.headlineSmall)
+            Text("Chọn phương thức thanh toán", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-//            Button(onClick = { paymentMethod = "Credit Card" }) {
-//                Text("Credit Card")
+//            Button(onClick = { paymentMethod = "Thẻ tín dụng" }) {
+//                Text("Thẻ tín dụng")
 //            }
 
 //            Spacer(modifier = Modifier.height(16.dp))
@@ -58,8 +59,8 @@ fun PaymentScreen(navController: NavController, serviceId: String, date: String,
 //            Button(onClick = { paymentMethod = "PayPal" }) {
 //                Text("PayPal")
 //            }
-            Button(onClick = { paymentMethod = "Cash" }) {
-                Text("Cash")
+            Button(onClick = { paymentMethod = "Tiền mặt" }) {
+                Text("Tiền mặt")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -67,19 +68,15 @@ fun PaymentScreen(navController: NavController, serviceId: String, date: String,
             Button(
                 onClick = {
                     if (paymentMethod.isNotEmpty()) {
-
                         coroutineScope.launch {
                             navController.navigate(OrderSuccess.route)
                             firebaseHelper.saveOrder(currentUserId, serviceId, date, address, paymentMethod)
-
                         }
-
                     }
                 }
             ) {
-                Text("Confirm and Pay")
+                Text("Xác nhận và thanh toán")
             }
         }
     }
 }
-

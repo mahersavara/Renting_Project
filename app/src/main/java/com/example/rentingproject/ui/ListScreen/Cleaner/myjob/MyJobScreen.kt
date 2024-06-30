@@ -57,10 +57,10 @@ fun MyJobScreen(navController: NavController, modifier: Modifier = Modifier) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Requests") },
+                title = { Text(text = "Yêu cầu") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -109,13 +109,13 @@ fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper:
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Service: ${order.serviceId}", style = MaterialTheme.typography.bodyLarge)
-                    Text(text = "Date: ${order.date}", style = MaterialTheme.typography.bodySmall)
-                    Text(text = "Address: ${order.address}", style = MaterialTheme.typography.bodySmall)
+                    Text(text = "Dịch vụ: ${order.serviceId}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "Ngày: ${order.date}", style = MaterialTheme.typography.bodySmall)
+                    Text(text = "Địa chỉ: ${order.address}", style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 if (order.status == "pending") {
-                    Icon(painter = painterResource(id = R.drawable.ic_dot), contentDescription = "New Request", tint = Color.Blue)
+                    Icon(painter = painterResource(id = R.drawable.ic_dot), contentDescription = "Yêu cầu mới", tint = Color.Blue)
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -124,16 +124,16 @@ fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper:
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = { onAction(order.id, "accepted") }) {
-                    Text(text = "Accept")
+                    Text(text = "Chấp nhận")
                 }
                 Button(onClick = { onAction(order.id, "cancelled") }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                    Text(text = "Reject")
+                    Text(text = "Từ chối")
                 }
                 Button(onClick = {
                     coroutineScope.launch {
                         val participants = listOf(order.userId, currentUserId)
                         val conversationId = firebaseHelper.getOrCreateConversationId(participants)
-                        navController.navigate(Inbox.createRoute(conversationId, participants)) // Navigate to chat screen
+                        navController.navigate(Inbox.createRoute(conversationId, participants)) // Điều hướng đến màn hình chat
                     }
                 }) {
                     Text(text = "Chat")

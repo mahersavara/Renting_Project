@@ -40,10 +40,10 @@ fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Transaction History") },
+                title = { Text(text = "Lịch sử giao dịch") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
                     }
                 }
             )
@@ -94,16 +94,16 @@ fun TransactionHistoryItem(navController: NavController, order: Order) {
             }
     ) {
         Text(
-            text = "Service: ${order.serviceId}",
+            text = "Dịch vụ: ${order.serviceId}",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Date: ${order.date}",
+            text = "Ngày: ${order.date}",
             style = MaterialTheme.typography.bodyMedium
         )
         Text(
-            text = "Address: ${order.address}",
+            text = "Địa chỉ: ${order.address}",
             style = MaterialTheme.typography.bodySmall
         )
         Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
