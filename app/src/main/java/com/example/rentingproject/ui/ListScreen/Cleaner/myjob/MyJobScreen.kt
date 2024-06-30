@@ -23,7 +23,6 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
 import timber.log.Timber
-
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -89,10 +88,20 @@ fun MyJobScreen(navController: NavController, modifier: Modifier = Modifier) {
     }
 }
 
+
+
+
 @Composable
 fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper: FirebaseHelper, onAction: (String, String) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     val currentUserId = firebaseHelper.auth.currentUser?.uid.orEmpty()
+    var serviceName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(order.serviceId) {
+        coroutineScope.launch {
+            serviceName = firebaseHelper.getServiceNameById(order.serviceId)
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -109,7 +118,7 @@ fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper:
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Dịch vụ: ${order.serviceId}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "Dịch vụ: $serviceName", style = MaterialTheme.typography.bodyLarge)
                     Text(text = "Ngày: ${order.date}", style = MaterialTheme.typography.bodySmall)
                     Text(text = "Địa chỉ: ${order.address}", style = MaterialTheme.typography.bodySmall)
                 }

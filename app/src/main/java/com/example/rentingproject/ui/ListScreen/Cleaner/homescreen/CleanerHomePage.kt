@@ -25,9 +25,7 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.ui.components.ServiceCard
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = CleanerHome.route
@@ -135,7 +133,7 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(pendingOrders.size) { index ->
-                        PendingOrderItem(order = pendingOrders[index]) { orderId, status ->
+                        PendingOrderItem(order = pendingOrders[index], firebaseHelper = firebaseHelper) { orderId, status ->
                             handleOrderAction(orderId, status)
                         }
                     }
@@ -174,7 +172,18 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun PendingOrderItem(order: Order, onAction: (String, String) -> Unit) {
+fun PendingOrderItem(order: Order, firebaseHelper: FirebaseHelper, onAction: (String, String) -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+    var userName by remember { mutableStateOf("Loading...") }
+    var serviceName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(order.userId) {
+        coroutineScope.launch {
+            userName = firebaseHelper.getUserNameById(order.userId)
+            serviceName = firebaseHelper.getServiceNameById(order.serviceId)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,8 +191,8 @@ fun PendingOrderItem(order: Order, onAction: (String, String) -> Unit) {
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
-        Text(text = "Đơn hàng từ: ${order.userId}", style = MaterialTheme.typography.bodyLarge)
-        Text(text = "Dịch vụ: ${order.serviceId}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Đơn hàng từ: $userName", style = MaterialTheme.typography.bodyLarge)
+        Text(text = "Dịch vụ: $serviceName", style = MaterialTheme.typography.bodyMedium)
         Text(text = "Ngày: ${order.date}", style = MaterialTheme.typography.bodyMedium)
         Text(text = "Địa chỉ: ${order.address}", style = MaterialTheme.typography.bodyMedium)
 

@@ -707,5 +707,24 @@ class FirebaseHelper {
         }
     }
 
+    suspend fun getUserNameById(userId: String): String {
+        return try {
+            val userSnapshot = db.collection("users").document(userId).get().await()
+            userSnapshot.getString("name") ?: "Unknown User"
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching user name for userId: $userId")
+            "Unknown User"
+        }
+    }
+
+    suspend fun getServiceNameById(serviceId: String): String {
+        return try {
+            val serviceSnapshot = db.collection("services").document(serviceId).get().await()
+            serviceSnapshot.getString("name") ?: "Unknown Service"
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching service name for serviceId: $serviceId")
+            "Unknown Service"
+        }
+    }
 
 }

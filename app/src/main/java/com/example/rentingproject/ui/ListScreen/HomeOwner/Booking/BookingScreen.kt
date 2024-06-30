@@ -31,6 +31,8 @@ import timber.log.Timber
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +89,7 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
                 bookings = bookings
             )
             Spacer(modifier = Modifier.height(16.dp))
-            BookingList(selectedDate = selectedDate, bookings = bookings)
+            BookingList(selectedDate = selectedDate, bookings = bookings, firebaseHelper = firebaseHelper)
         }
     }
 }
@@ -157,7 +159,7 @@ fun MonthlyCalendarView(
                                     fontWeight = if (selectedDate == date) FontWeight.Bold else FontWeight.Normal,
                                     color = if (selectedDate == date) MaterialTheme.colorScheme.primary else Color.Unspecified
                                 )
-                                if (bookings.any { LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma")) == date }) {
+                                if (bookings.any { parseDate(it.date) == date }) {
                                     Box(
                                         modifier = Modifier
                                             .size(6.dp)
@@ -177,9 +179,9 @@ fun MonthlyCalendarView(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BookingList(selectedDate: LocalDate, bookings: List<Order>) {
+fun BookingList(selectedDate: LocalDate, bookings: List<Order>, firebaseHelper: FirebaseHelper) {
     val filteredBookings = bookings.filter {
-        LocalDate.parse(it.date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma")) == selectedDate
+        parseDate(it.date) == selectedDate
     }
 
     if (filteredBookings.isEmpty()) {
@@ -192,21 +194,30 @@ fun BookingList(selectedDate: LocalDate, bookings: List<Order>) {
     } else {
         LazyColumn {
             items(filteredBookings) { booking ->
-                BookingItem(booking)
+                BookingItem(booking, firebaseHelper)
             }
         }
     }
 }
 
 @Composable
-fun BookingItem(booking: Order) {
+fun BookingItem(booking: Order, firebaseHelper: FirebaseHelper) {
+    val coroutineScope = rememberCoroutineScope()
+    var serviceName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(booking.serviceId) {
+        coroutineScope.launch {
+            serviceName = firebaseHelper.getServiceNameById(booking.serviceId)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         Text(
-            text = "${booking.date} - ${booking.serviceId}",
+            text = "${booking.date} - $serviceName",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
         )
@@ -227,6 +238,20 @@ fun BookingItem(booking: Order) {
             }
         }
         Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun parseDate(dateString: String): LocalDate? {
+    val dateFormatter = DateTimeFormatter.ofPattern("EEE MMM dd yyyy, hh:mma", Locale.ENGLISH)
+    return try {
+        LocalDate.parse(dateString, dateFormatter)
+    } catch (e: DateTimeParseException) {
+        try {
+            LocalDate.parse(dateString, dateFormatter.withLocale(Locale.getDefault()))
+        } catch (e: DateTimeParseException) {
+            null
+        }
     }
 }
 

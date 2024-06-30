@@ -17,7 +17,8 @@ import java.util.*
 
 @Composable
 fun ChooseDateScreen(navController: NavController, serviceId: String) {
-    var selectedDate by remember { mutableStateOf("") }
+    var selectedDateVietnamese by remember { mutableStateOf("") }
+    var selectedDateEnglish by remember { mutableStateOf("") }
     val calendar = remember { Calendar.getInstance() }
     val context = LocalContext.current
 
@@ -53,7 +54,10 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
             { _, hourOfDay, minute ->
                 calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 calendar.set(Calendar.MINUTE, minute)
-                selectedDate = SimpleDateFormat("EEE MMM dd yyyy, hh:mma", Locale.getDefault()).format(calendar.time)
+                val dateFormatVietnamese = SimpleDateFormat("EEE MMM dd yyyy, hh:mma", Locale.getDefault())
+                val dateFormatEnglish = SimpleDateFormat("EEE MMM dd yyyy, hh:mma", Locale.ENGLISH)
+                selectedDateVietnamese = dateFormatVietnamese.format(calendar.time)
+                selectedDateEnglish = dateFormatEnglish.format(calendar.time)
                 showTimePicker = false
             },
             calendar.get(Calendar.HOUR_OF_DAY),
@@ -89,14 +93,14 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Ngày đã chọn: $selectedDate")
+        Text("Ngày đã chọn: $selectedDateVietnamese")
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if (selectedDate.isNotEmpty()) {
-                    navController.navigate(DeliveryAddress.createRoute(serviceId, selectedDate))
+                if (selectedDateEnglish.isNotEmpty()) {
+                    navController.navigate(DeliveryAddress.createRoute(serviceId, selectedDateEnglish))
                 }
             }
         ) {
