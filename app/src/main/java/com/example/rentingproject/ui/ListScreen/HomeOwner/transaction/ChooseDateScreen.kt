@@ -2,6 +2,7 @@ package com.example.rentingproject.ui.ListScreen.HomeOwner.transaction
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.widget.Button
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,7 +25,7 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
     var showTimePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
-        DatePickerDialog(
+        val datePickerDialog = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 calendar.set(year, month, dayOfMonth)
@@ -34,11 +35,20 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        )
+
+        datePickerDialog.setOnShowListener {
+            val positiveButton: Button = datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)
+            positiveButton.text = "Chọn"
+            val negativeButton: Button = datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)
+            negativeButton.text = "Hủy"
+        }
+
+        datePickerDialog.show()
     }
 
     if (showTimePicker) {
-        TimePickerDialog(
+        val timePickerDialog = TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
                 calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
@@ -49,7 +59,16 @@ fun ChooseDateScreen(navController: NavController, serviceId: String) {
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
             false
-        ).show()
+        )
+
+        timePickerDialog.setOnShowListener {
+            val positiveButton: Button = timePickerDialog.getButton(TimePickerDialog.BUTTON_POSITIVE)
+            positiveButton.text = "Chọn"
+            val negativeButton: Button = timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE)
+            negativeButton.text = "Hủy"
+        }
+
+        timePickerDialog.show()
     }
 
     Column(
