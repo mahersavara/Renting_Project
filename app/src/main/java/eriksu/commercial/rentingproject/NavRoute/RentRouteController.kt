@@ -14,7 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.MessageScreen
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.MessageScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Account.AccountScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Account.LeaveReview.LeaveReviewScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Account.MyAddress.MyAddressDetailScreen
@@ -24,11 +24,11 @@ import eriksu.commercial.rentingproject.ui.ListScreen.Cleaner.jobs.AllJobsScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Cleaner.jobs.EditJobScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Cleaner.jobs.PostJobScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Cleaner.myjob.MyJobScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.ChooseDateScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.DeliveryAddressScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.OrderSuccessScreen
-import com.example.rentingproject.ui.ListScreen.HomeOwner.transaction.PaymentScreen
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.ServiceJob.LikedServiceScreen
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.transaction.ChooseDateScreen
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.transaction.DeliveryAddressScreen
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.transaction.OrderSuccessScreen
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.transaction.PaymentScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Account.LoginScreen.LoginScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Account.PersonalInfo.PersonalInfoScreen
 import eriksu.commercial.rentingproject.ui.ListScreen.Account.RegisterScreen.SignUpScreen

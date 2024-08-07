@@ -1,4 +1,4 @@
-package com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceJob
+package eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.ServiceJob
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.*

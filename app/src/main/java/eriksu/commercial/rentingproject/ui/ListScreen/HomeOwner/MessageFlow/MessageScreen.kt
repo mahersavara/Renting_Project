@@ -1,4 +1,4 @@
-package com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow
+package eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.MessageFlow
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

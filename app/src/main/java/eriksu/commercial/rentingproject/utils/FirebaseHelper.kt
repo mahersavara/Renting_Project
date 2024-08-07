@@ -1,7 +1,7 @@
 package eriksu.commercial.rentingproject.utils
 
 import android.net.Uri
-import com.example.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.Conversation
+import eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.MessageFlow.Conversation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore

@@ -1,5 +1,5 @@
 // OrderSuccessScreen.kt
-package com.example.rentingproject.ui.ListScreen.HomeOwner.transaction
+package eriksu.commercial.rentingproject.ui.ListScreen.HomeOwner.transaction
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
