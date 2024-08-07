@@ -2,21 +2,9 @@ package com.example.rentingproject.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +23,7 @@ fun ServiceCard(navController: NavController, service: Service) {
         modifier = Modifier
             .width(160.dp)
             .height(240.dp)
+            .padding(8.dp)
             .clickable { navController.navigate(ServiceDetail.createRoute(service.id)) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -45,28 +34,42 @@ fun ServiceCard(navController: NavController, service: Service) {
                 .padding(8.dp)
         ) {
             Image(
-                painter = rememberImagePainter(data = service.images.firstOrNull() ?: ""),
+                painter = rememberImagePainter(data = service.images.firstOrNull() ?: R.drawable.cleaner_sample),
                 contentDescription = "Service Image",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
+                    .padding(4.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = service.name, style = MaterialTheme.typography.bodyMedium)
-            Text(text = service.location, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = service.name,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+            Text(
+                text = service.location,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
             ) {
                 Text(text = service.price, style = MaterialTheme.typography.bodyMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                    Image(
                         painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = "Rating",
-                        tint = Color.Yellow
+                        modifier = Modifier.size(16.dp)
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)
                 }
             }

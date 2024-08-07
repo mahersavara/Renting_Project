@@ -2,19 +2,9 @@ package com.example.rentingproject.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +32,7 @@ fun JobItem(navController: NavController, job: Service) {
             modifier = Modifier.padding(16.dp)
         ) {
             Image(
-                painter = rememberImagePainter(data = job.images.firstOrNull() ?: ""),
+                painter = rememberImagePainter(data = job.images.firstOrNull() ?: R.drawable.cleaner_sample),
                 contentDescription = "Job Image",
                 modifier = Modifier.size(80.dp)
             )
@@ -52,7 +42,8 @@ fun JobItem(navController: NavController, job: Service) {
                 Text(text = job.location, style = MaterialTheme.typography.bodySmall)
                 Text(text = job.price, style = MaterialTheme.typography.bodyMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painter = painterResource(id = R.drawable.ic_star), contentDescription = "Rating", tint = Color.Yellow)
+                    Image(painter = painterResource(id = R.drawable.ic_star), contentDescription = "Rating", modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(text = job.rating.toString(), style = MaterialTheme.typography.bodyMedium)
                 }
             }

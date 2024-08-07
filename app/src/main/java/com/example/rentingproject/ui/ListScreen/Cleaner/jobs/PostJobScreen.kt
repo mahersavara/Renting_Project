@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -58,10 +59,11 @@ fun PostJobScreen(navController: NavController, modifier: Modifier = Modifier) {
                 }
             )
         }
-    ) {
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(16.dp)
         ) {
             Box(
@@ -72,7 +74,7 @@ fun PostJobScreen(navController: NavController, modifier: Modifier = Modifier) {
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                    Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Tải lên hình ảnh")
+                    Image(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Tải lên hình ảnh", modifier = Modifier.size(50.dp))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

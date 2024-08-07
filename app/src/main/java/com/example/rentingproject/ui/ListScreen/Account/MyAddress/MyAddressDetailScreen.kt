@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -73,10 +74,11 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
                 Icon(painter = painterResource(id = R.drawable.ic_check), contentDescription = "Lưu địa chỉ")
             }
         }
-    ) {
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(16.dp)
         ) {
             OutlinedTextField(
@@ -114,7 +116,11 @@ fun MyAddressDetailScreen(navController: NavController, addressId: String, modif
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Địa chỉ mặc định", modifier = Modifier.weight(1f))
-                Switch(checked = isDefaultAddress, onCheckedChange = { isDefaultAddress = it })
+                Switch(
+                    checked = isDefaultAddress,
+                    onCheckedChange = { isDefaultAddress = it },
+                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary)
+                )
             }
         }
     }

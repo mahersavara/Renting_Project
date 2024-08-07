@@ -17,8 +17,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -91,18 +89,8 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
 
     val dialogState = rememberMaterialDialogState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Scaffold(
+        topBar = {
             TopAppBar(
                 title = { Text("Thông tin cá nhân") },
                 navigationIcon = {
@@ -114,7 +102,17 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                     }
                 }
             )
-
+        },
+        modifier = modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets.systemBars
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (profilePictureUri != null) {
@@ -227,7 +225,6 @@ fun PersonalInfoScreen(navController: NavController, modifier: Modifier = Modifi
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
 
             Spacer(modifier = Modifier.height(16.dp))
 

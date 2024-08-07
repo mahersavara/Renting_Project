@@ -2,11 +2,11 @@ package com.example.rentingproject.ui.ListScreen.HomeOwner.Booking
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -43,12 +43,14 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val firebaseHelper = FirebaseHelper()
     var bookings by remember { mutableStateOf(listOf<Order>()) }
+    var userRole by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
             firebaseHelper.getUserRole(uid) { role ->
+                userRole = role
                 coroutineScope.launch {
                     bookings = firebaseHelper.getAcceptedOrders(uid, role == "HomeOwner")
                 }
@@ -68,7 +70,9 @@ fun BookingScreen(navController: NavController, modifier: Modifier = Modifier) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = "booking")
+            userRole?.let {
+                BottomNavigationBar(navController = navController, currentRoute = "booking", userRole = it)
+            }
         }
     ) {
         Column(
@@ -229,12 +233,12 @@ fun BookingItem(booking: Order, firebaseHelper: FirebaseHelper) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Handle Chat */ }) {
-                Icon(painter = painterResource(id = R.drawable.ic_message), contentDescription = "Chat")
-            }
+//            IconButton(onClick = { /* Handle Chat */ }) {
+//                Image(painter = painterResource(id = R.drawable.ic_message), contentDescription = "Chat")
+//            }
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(onClick = { /* Handle Cancel */ }) {
-                Icon(painter = painterResource(id = R.drawable.ic_cancel), contentDescription = "Hủy")
+                Image(painter = painterResource(id = R.drawable.ic_cancel), contentDescription = "Hủy")
             }
         }
         Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))

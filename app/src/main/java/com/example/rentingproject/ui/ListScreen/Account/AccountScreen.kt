@@ -60,96 +60,112 @@ fun AccountScreen(navController: NavController, modifier: Modifier = Modifier) {
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Tài khoản") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            userRole?.let { BottomNavigationBar(navController, currentRoute, it) }
+        }
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (userProfilePicture != null) {
-                    Image(
-                        painter = rememberImagePainter(userProfilePicture),
-                        contentDescription = "Hình đại diện",
-                        modifier = Modifier.size(64.dp)
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_me),
-                        contentDescription = "Hình đại diện",
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(userName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text(userPhoneNumber, fontSize = 16.sp)
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = "Chỉnh sửa hồ sơ",
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clickable {
-                            navController.navigate(PersonalInfo.route)
-                        }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFFF3E0))
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Xác minh email của bạn để bảo vệ tài khoản tốt hơn.", modifier = Modifier.weight(1f))
-                    Button(onClick = { /* Xử lý xác minh email */ }) {
-                        Text("Xác minh")
+                    if (userProfilePicture != null) {
+                        Image(
+                            painter = rememberImagePainter(userProfilePicture),
+                            contentDescription = "Hình đại diện",
+                            modifier = Modifier.size(64.dp)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_me),
+                            contentDescription = "Hình đại diện",
+                            modifier = Modifier.size(64.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(userName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(userPhoneNumber, fontSize = 16.sp)
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_edit),
+                        contentDescription = "Chỉnh sửa hồ sơ",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                navController.navigate(PersonalInfo.route)
+                            }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFFFF3E0))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Xác minh email của bạn để bảo vệ tài khoản tốt hơn.", modifier = Modifier.weight(1f))
+                        Button(onClick = { /* Xử lý xác minh email */ }) {
+                            Text("Xác minh")
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (userRole == "HomeOwner") {
+                    ListItem("Lịch sử giao dịch", id = R.drawable.ic_trans_history, navController = navController, route = TransactionHistory.route)
+                }
+
+                ListItem("Quyền riêng tư & Bảo mật", id = R.drawable.ic_privacy, navController = navController)
+                ListItem("Phương thức thanh toán", id = R.drawable.ic_payment_method, navController = navController, route = payment.route)
+                ListItem("Địa chỉ", id = R.drawable.ic_address, navController = navController, route = MyAddress.route)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        firebaseHelper.auth.signOut()
+                        navController.navigate(Login.route) {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Đăng xuất")
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (userRole == "HomeOwner") {
-                ListItem("Lịch sử giao dịch", id = R.drawable.ic_trans_history, navController = navController, route = TransactionHistory.route)
-            }
-
-            ListItem("Quyền riêng tư & Bảo mật", id = R.drawable.ic_privacy, navController = navController)
-            ListItem("Phương thức thanh toán", id = R.drawable.ic_payment_method, navController = navController, route = payment.route)
-            ListItem("Địa chỉ", id = R.drawable.ic_address, navController = navController, route = MyAddress.route)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    firebaseHelper.auth.signOut()
-                    navController.navigate(Login.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Đăng xuất")
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            userRole?.let { BottomNavigationBar(navController, currentRoute, it) }
         }
     }
 }
@@ -168,6 +184,6 @@ fun ListItem(text: String, @DrawableRes id: Int, navController: NavController, r
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text, modifier = Modifier.weight(1f), fontSize = 16.sp)
-        Icon(painter = painterResource(id = id), contentDescription = null)
+        Image(painter = painterResource(id = id), contentDescription = null, modifier = Modifier.size(24.dp))
     }
 }

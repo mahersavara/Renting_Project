@@ -2,15 +2,13 @@
 package com.example.rentingproject.ui.ListScreen.HomeOwner.transaction
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rentingproject.NavRoute.OrderSuccess
@@ -38,45 +36,90 @@ fun PaymentScreen(navController: NavController, serviceId: String, date: String,
                     }
                 }
             )
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Chọn phương thức thanh toán", style = MaterialTheme.typography.headlineSmall)
+        },
+        content = { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Chọn phương thức thanh toán", style = MaterialTheme.typography.headlineSmall)
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-//            Button(onClick = { paymentMethod = "Thẻ tín dụng" }) {
-//                Text("Thẻ tín dụng")
-//            }
-
-//            Spacer(modifier = Modifier.height(16.dp))
+//                Button(
+//                    onClick = { paymentMethod = "Thẻ tín dụng" },
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Row(
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Image(
+//                            painter = painterResource(id = R.drawable.ic_credit_card),
+//                            contentDescription = "Thẻ tín dụng",
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                        Spacer(modifier = Modifier.width(8.dp))
+//                        Text("Thẻ tín dụng")
+//                    }
+//                }
 //
-//            Button(onClick = { paymentMethod = "PayPal" }) {
-//                Text("PayPal")
-//            }
-            Button(onClick = { paymentMethod = "Tiền mặt" }) {
-                Text("Tiền mặt")
-            }
+//                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+//                Button(
+//                    onClick = { paymentMethod = "PayPal" },
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Row(
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Image(
+//                            painter = painterResource(id = R.drawable.ic_paypal),
+//                            contentDescription = "PayPal",
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                        Spacer(modifier = Modifier.width(8.dp))
+//                        Text("PayPal")
+//                    }
+//                }
 
-            Button(
-                onClick = {
-                    if (paymentMethod.isNotEmpty()) {
-                        coroutineScope.launch {
-                            navController.navigate(OrderSuccess.route)
-                            firebaseHelper.saveOrder(currentUserId, serviceId, date, address, paymentMethod)
-                        }
+//                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { paymentMethod = "Tiền mặt" },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_cash),
+                            contentDescription = "Tiền mặt",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Tiền mặt")
                     }
                 }
-            ) {
-                Text("Xác nhận và thanh toán")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        if (paymentMethod.isNotEmpty()) {
+                            coroutineScope.launch {
+                                navController.navigate(OrderSuccess.route)
+                                firebaseHelper.saveOrder(currentUserId, serviceId, date, address, paymentMethod)
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Xác nhận và thanh toán")
+                }
             }
         }
-    }
+    )
 }

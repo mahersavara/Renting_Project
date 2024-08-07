@@ -52,7 +52,11 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                 title = { Text(text = "Chi tiết dịch vụ") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Quay lại",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 actions = {
@@ -66,9 +70,10 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                             isLiked = !isLiked
                         }
                     }) {
-                        Icon(
+                        Image(
                             painter = painterResource(id = if (isLiked) R.drawable.ic_liked else R.drawable.ic_like),
-                            contentDescription = "Nút yêu thích"
+                            contentDescription = "Nút yêu thích",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -105,10 +110,11 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                    Image(
                         painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = "Đánh giá",
-                        tint = Color.Yellow
+                        modifier = Modifier.size(24.dp),
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.Yellow)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = "${it.rating} (${it.popularity})", style = MaterialTheme.typography.bodyMedium)
@@ -130,19 +136,19 @@ fun ServiceDetailScreen(navController: NavController, serviceId: String, modifie
                 ) {
                     Text(text = "Đặt ngay")
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            val participants = listOf(it.userId, uid)
-                            val conversationId = firebaseHelper.getOrCreateConversationId(participants)
-                            navController.navigate(Inbox.createRoute(conversationId, participants)) // Điều hướng đến màn hình chat
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Trò chuyện với nhân viên dọn dẹp")
-                }
+//                Spacer(modifier = Modifier.height(16.dp))
+//                Button(
+//                    onClick = {
+//                        coroutineScope.launch {
+//                            val participants = listOf(it.userId, uid)
+//                            val conversationId = firebaseHelper.getOrCreateConversationId(participants)
+//                            navController.navigate(Inbox.createRoute(conversationId, participants)) // Điều hướng đến màn hình chat
+//                        }
+//                    },
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text(text = "Trò chuyện với nhân viên dọn dẹp")
+//                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Đánh giá",

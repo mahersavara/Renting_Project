@@ -23,6 +23,7 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
 import timber.log.Timber
+
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -88,9 +89,6 @@ fun MyJobScreen(navController: NavController, modifier: Modifier = Modifier) {
     }
 }
 
-
-
-
 @Composable
 fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper: FirebaseHelper, onAction: (String, String) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
@@ -124,7 +122,11 @@ fun PendingOrderItem(order: Order, navController: NavController, firebaseHelper:
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 if (order.status == "pending") {
-                    Icon(painter = painterResource(id = R.drawable.ic_dot), contentDescription = "Yêu cầu mới", tint = Color.Blue)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_dot),
+                        contentDescription = "Yêu cầu mới",
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))

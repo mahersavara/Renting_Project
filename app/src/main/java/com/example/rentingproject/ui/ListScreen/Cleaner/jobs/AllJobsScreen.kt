@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,8 +25,10 @@ import com.example.rentingproject.R
 import com.example.rentingproject.database.model.job.Service
 import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.ui.components.JobItem
+import com.example.rentingproject.ui.components.ServiceCard
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,20 +77,41 @@ fun AllJobsScreen(navController: NavController, modifier: Modifier = Modifier) {
                 Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Thêm")
             }
         }
-    ) {
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                items(services.size) { index ->
-                    JobItem(navController = navController, job = services[index])
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
+            } else {
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = 100.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(services.size) { index ->
+                        JobItem(navController = navController, job = services[index])
+                    }
+                }
+
+//                LazyColumn(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .padding(16.dp)
+//                ) {
+//                    items(services.size) { index ->
+//                        JobItem(navController = navController, job = services[index])
+//                    }
+//                }
             }
         }
     }

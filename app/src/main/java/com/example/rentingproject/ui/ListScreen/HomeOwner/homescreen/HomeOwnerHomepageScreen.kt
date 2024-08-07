@@ -6,8 +6,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -24,8 +24,8 @@ import coil.compose.rememberImagePainter
 import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
 import com.example.rentingproject.database.model.job.Service
-import com.example.rentingproject.ui.ListScreen.HomeOwner.ServiceCard
 import com.example.rentingproject.ui.components.BottomNavigationBar
+import com.example.rentingproject.ui.components.ServiceCard
 import com.example.rentingproject.utils.FirebaseHelper
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.Job
@@ -35,10 +35,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = Modifier) {
     val currentRoute = HomeOwnerHome.route
-    val userRole = "HomeOwner"
     val firebaseHelper = FirebaseHelper()
     var address by remember { mutableStateOf("") }
     var allServices by remember { mutableStateOf(listOf<Service>()) }
@@ -51,6 +51,7 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
     val context = LocalContext.current
 
     val listState = rememberLazyListState()
+    var userRole by remember { mutableStateOf<String?>(null) }
 
     fun loadMoreServices() {
         coroutineScope.launch {
@@ -71,6 +72,9 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
     fun fetchData() {
         coroutineScope.launch {
             val uid = firebaseHelper.auth.currentUser?.uid.orEmpty()
+            firebaseHelper.getUserRole(uid) { role ->
+                userRole = role
+            }
             val addresses = firebaseHelper.getUserAddresses(uid)
             val defaultAddress = addresses.find { it.isDefault }
             address = defaultAddress?.let { "${it.street}, ${it.city}, ${it.country}" } ?: "Chưa có địa chỉ mặc định"
@@ -112,7 +116,9 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = userRole)
+            userRole?.let {
+                BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = it)
+            }
         }
     ) {
         Column(
@@ -131,9 +137,10 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                 Text(text = "Địa chỉ: $address", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(onClick = { navController.navigate(MyAddress.route) }) {
-                    Icon(
+                    Image(
                         painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = "Chỉnh sửa địa chỉ"
+                        contentDescription = "Chỉnh sửa địa chỉ",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -151,9 +158,10 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                 onValueChange = { searchQuery = it },
                 label = { Text("Tìm kiếm") },
                 leadingIcon = {
-                    Icon(
+                    Image(
                         painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Tìm kiếm"
+                        contentDescription = "Tìm kiếm",
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 modifier = Modifier
@@ -173,14 +181,13 @@ fun HomeOwnerHomepageScreen(navController: NavController, modifier: Modifier = M
                     CircularProgressIndicator()
                 }
             } else {
-                LazyColumn(
-                    state = listState,
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
+                    contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
-                    // ! todo not tested with >=10 function.
-                    itemsIndexed(filteredServices) { index, service ->
-                        ServiceCard(navController = navController, service = service)
+                    items(filteredServices.size) { index ->
+                        ServiceCard(navController = navController, service = filteredServices[index])
                     }
                 }
             }
