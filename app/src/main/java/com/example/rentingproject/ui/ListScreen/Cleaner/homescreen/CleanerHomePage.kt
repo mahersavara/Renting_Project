@@ -3,7 +3,6 @@ package com.example.rentingproject.ui.ListScreen.Cleaner.homescreen
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,10 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.example.rentingproject.NavRoute.*
 import com.example.rentingproject.R
 import com.example.rentingproject.database.model.Order
@@ -25,6 +25,7 @@ import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.ui.components.ServiceCard
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier) {
@@ -95,10 +96,10 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Địa chỉ: $address", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "Địa chỉ: $address", style = MaterialTheme.typography.bodyMedium, fontSize = 16.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     IconButton(onClick = { navController.navigate(MyAddress.route) }) {
-                        Icon(
+                        Image(
                             painter = painterResource(id = R.drawable.ic_edit),
                             contentDescription = "Chỉnh sửa địa chỉ"
                         )
@@ -109,6 +110,7 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                 Text(
                     text = "Địa chỉ của tôi tại $address",
                     style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
 
@@ -122,7 +124,8 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                 ) {
                     Text(
                         text = "Yêu cầu (${pendingOrders.size})",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 18.sp
                     )
                     TextButton(onClick = { navController.navigate(MyJob.route) }) {
                         Text(text = "Tất cả")
@@ -130,7 +133,10 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                 }
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.8f)
+//                        .height(200.dp)
                 ) {
                     items(pendingOrders.size) { index ->
                         PendingOrderItem(order = pendingOrders[index], firebaseHelper = firebaseHelper) { orderId, status ->
@@ -151,7 +157,8 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                 ) {
                     Text(
                         text = "Danh sách của bạn",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 18.sp
                     )
                     TextButton(onClick = { navController.navigate(AllJobs.route) }) {
                         Text(text = "Tất cả")
@@ -159,8 +166,13 @@ fun CleanerHomePage(navController: NavController, modifier: Modifier = Modifier)
                 }
 
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1.2f)
+//                        .height(100.dp)
+                    ,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
                     items(services.size) { index ->
                         ServiceCard(navController = navController, service = services[index])
@@ -191,10 +203,10 @@ fun PendingOrderItem(order: Order, firebaseHelper: FirebaseHelper, onAction: (St
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
-        Text(text = "Đơn hàng từ: $userName", style = MaterialTheme.typography.bodyLarge)
-        Text(text = "Dịch vụ: $serviceName", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Ngày: ${order.date}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Địa chỉ: ${order.address}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Đơn hàng từ: $userName", style = MaterialTheme.typography.bodyLarge, fontSize = 16.sp)
+        Text(text = "Dịch vụ: $serviceName", style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
+        Text(text = "Ngày: ${order.date}", style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
+        Text(text = "Địa chỉ: ${order.address}", style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
 
         Row(
             modifier = Modifier

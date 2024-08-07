@@ -17,9 +17,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.rentingproject.R
 import com.example.rentingproject.ui.components.BottomNavigationBar
 import com.example.rentingproject.NavRoute.Liked
+import com.example.rentingproject.NavRoute.ServiceDetail
 import com.example.rentingproject.database.model.job.Service
 import com.example.rentingproject.utils.FirebaseHelper
 import kotlinx.coroutines.launch
@@ -46,9 +48,10 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
                 title = { Text(text = "Yêu thích") },
                 actions = {
                     IconButton(onClick = { /* Handle Filter */ }) {
-                        Icon(
+                        Image(
                             painter = painterResource(id = R.drawable.ic_filter),
-                            contentDescription = "Lọc"
+                            contentDescription = "Lọc",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -57,12 +60,13 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
         bottomBar = {
             BottomNavigationBar(navController = navController, currentRoute = currentRoute, userRole = "HomeOwner")
         }
-    ) {
+    ) { pd ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp)
+                .padding(pd)
         ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -71,7 +75,7 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(likedServices.size) { index ->
-                    LikedServiceCard(service = likedServices[index])
+                    LikedServiceCard(service = likedServices[index], navController = navController)
                 }
             }
         }
@@ -79,12 +83,11 @@ fun LikedServiceScreen(navController: NavController, modifier: Modifier = Modifi
 }
 
 @Composable
-fun LikedServiceCard(service: Service) {
+fun LikedServiceCard(service: Service, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { /* Handle Click */ },
+            .clickable { /* Handle Click */ navController.navigate(ServiceDetail.createRoute(service.id)) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -94,7 +97,7 @@ fun LikedServiceCard(service: Service) {
                 .padding(8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.cleaner_sample), // Thay bằng hình ảnh dịch vụ thực tế
+                painter = rememberImagePainter(data = service.images.firstOrNull() ?: R.drawable.cleaner_sample),
                 contentDescription = "Hình ảnh dịch vụ",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,10 +114,11 @@ fun LikedServiceCard(service: Service) {
             ) {
                 Text(text = "\$${service.price}", style = MaterialTheme.typography.bodyMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                    Image(
                         painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = "Đánh giá",
-                        tint = Color.Yellow
+                        modifier = Modifier.size(16.dp),
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.Yellow)
                     )
                     Text(text = service.rating.toString(), style = MaterialTheme.typography.bodyMedium)
                 }

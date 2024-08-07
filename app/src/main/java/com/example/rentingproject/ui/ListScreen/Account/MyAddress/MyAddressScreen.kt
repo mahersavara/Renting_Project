@@ -1,5 +1,6 @@
 package com.example.rentingproject.ui.ListScreen.Account.MyAddress
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,16 +50,21 @@ fun MyAddressScreen(navController: NavController, modifier: Modifier = Modifier)
                 Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Thêm địa chỉ mới")
             }
         }
-    ) {
+    ) { innerPadding ->
         if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(addresses.size) { index ->
                     AddressItem(navController, addresses[index]) {
@@ -80,7 +86,7 @@ fun AddressItem(navController: NavController, address: Address, onDelete: () -> 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(vertical = 8.dp)
             .clickable { navController.navigate("${MyAddressDetail.route}/${address.id}") }
     ) {
         Text(text = address.street, style = MaterialTheme.typography.titleMedium)
@@ -88,10 +94,16 @@ fun AddressItem(navController: NavController, address: Address, onDelete: () -> 
         Text(text = "${address.name} | ${address.phoneNumber}", style = MaterialTheme.typography.bodySmall)
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
         ) {
             if (address.isDefault) {
-                Icon(painter = painterResource(id = R.drawable.ic_default), contentDescription = "Địa chỉ mặc định", tint = Color.Green)
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_default),
+                    contentDescription = "Địa chỉ mặc định",
+                    tint = Color.Green,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = "Mặc định", color = Color.Green, fontSize = 12.sp)
             } else {
@@ -104,12 +116,21 @@ fun AddressItem(navController: NavController, address: Address, onDelete: () -> 
                         }
                     }
                 }) {
-                    Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = "Xóa địa chỉ", tint = Color.Red)
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_delete),
+                        contentDescription = "Xóa địa chỉ",
+                        tint = Color.Red,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = { navController.navigate("${MyAddressDetail.route}/${address.id}") }) {
-                Icon(painter = painterResource(id = R.drawable.ic_edit), contentDescription = "Chỉnh sửa địa chỉ")
+                Image(
+                    painter = painterResource(id = R.drawable.ic_edit),
+                    contentDescription = "Chỉnh sửa địa chỉ",
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
         Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))

@@ -43,6 +43,7 @@ import com.example.rentingproject.NavRoute.Login
 import com.example.rentingproject.NavRoute.SignUp
 
 
+
 @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun IntroduceScreen(navController: NavController, modifier: Modifier = Modifier) {
@@ -128,7 +129,10 @@ fun OnboardingPage(
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = null,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(16.dp)
         )
         Text(
             text = title,

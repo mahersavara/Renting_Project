@@ -1,8 +1,10 @@
 package com.example.rentingproject.ui.ListScreen.Account.Payment
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,15 +36,17 @@ fun PaymentMethodScreen(navController: NavController, modifier: Modifier = Modif
                 onClick = { navController.popBackStack() }, // Handle Confirm Action
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(text = "Xác nhận")
             }
         }
-    ) {
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(16.dp)
         ) {
             PaymentMethodItem(
@@ -61,10 +65,10 @@ fun PaymentMethodItem(icon: Int, label: String, selected: Boolean, onSelect: () 
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
+            .padding(vertical = 12.dp)
             .clickable { onSelect() }
     ) {
-        Icon(painter = painterResource(id = icon), contentDescription = label)
+        Image(painter = painterResource(id = icon), contentDescription = label, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = label, style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.weight(1f))

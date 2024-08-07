@@ -3,6 +3,7 @@ package com.example.rentingproject.ui.ListScreen.HomeOwner.transaction
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,7 +51,7 @@ fun DeliveryAddressScreen(navController: NavController, serviceId: String, date:
                 Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Thêm địa chỉ mới")
             }
         }
-    ) {
+    ) { innerPadding ->
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -59,21 +60,43 @@ fun DeliveryAddressScreen(navController: NavController, serviceId: String, date:
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
+                    .padding(innerPadding)
             ) {
-                items(addresses.size) { index ->
-                    Text(
-                        text = addresses[index].street,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .clickable {
-                                navController.navigate(PaymentBooking.createRoute(serviceId, date, addresses[index].street))
-                            },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                items(addresses) { address ->
+                    AddressItem(address = address, onClick = {
+                        navController.navigate(PaymentBooking.createRoute(serviceId, date, address.street))
+                    })
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun AddressItem(address: Address, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = address.street,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${address.city}, ${address.country}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            )
         }
     }
 }

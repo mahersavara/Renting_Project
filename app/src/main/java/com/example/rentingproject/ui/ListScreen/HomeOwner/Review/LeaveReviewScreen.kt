@@ -1,6 +1,7 @@
 package com.example.rentingproject.ui.ListScreen.Account.LeaveReview
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -35,7 +36,11 @@ fun LeaveReviewScreen(navController: NavController, orderId: String, modifier: M
                 title = { Text(text = "Đánh giá dịch vụ") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Quay lại",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             )
@@ -94,7 +99,7 @@ fun RatingBar(rating: Int, onRatingChanged: (Int) -> Unit) {
         modifier = Modifier.fillMaxWidth()
     ) {
         for (i in 1..5) {
-            Icon(
+            Image(
                 painter = painterResource(id = if (i <= rating) R.drawable.ic_star_filled else R.drawable.ic_star_outline),
                 contentDescription = "Ngôi sao $i",
                 modifier = Modifier

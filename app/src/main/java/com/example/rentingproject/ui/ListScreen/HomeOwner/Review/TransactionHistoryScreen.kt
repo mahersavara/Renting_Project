@@ -1,8 +1,10 @@
 package com.example.rentingproject.ui.ListScreen.Account.TransactionHistory
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,7 +45,11 @@ fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = 
                 title = { Text(text = "Lịch sử giao dịch") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Quay lại")
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Quay lại",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             )
@@ -59,8 +65,7 @@ fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = 
                     .fillMaxSize()
                     .padding(it)
             ) {
-                items(orders.size) { index ->
-                    val order = orders[index]
+                items(orders) { order ->
                     val orderDate = SimpleDateFormat("EEE MMM dd yyyy, hh:mma", Locale.getDefault()).parse(order.date)
                     val isExpired = orderDate?.before(Date()) ?: false
 
@@ -82,9 +87,18 @@ fun TransactionHistoryScreen(navController: NavController, modifier: Modifier = 
         }
     }
 }
-
 @Composable
 fun TransactionHistoryItem(navController: NavController, order: Order) {
+    var serviceName by remember { mutableStateOf("Loading...") }
+    val firebaseHelper = FirebaseHelper()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(order.serviceId) {
+        coroutineScope.launch {
+            serviceName = firebaseHelper.getServiceNameById(order.serviceId)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,7 +108,7 @@ fun TransactionHistoryItem(navController: NavController, order: Order) {
             }
     ) {
         Text(
-            text = "Dịch vụ: ${order.serviceId}",
+            text = "Dịch vụ: $serviceName",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold
         )
