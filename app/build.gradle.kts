@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.rentingproject"
+    namespace = "eriksu.commercial.rentingproject"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.rentingproject"
+        applicationId = "eriksu.commercial.rentingproject"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

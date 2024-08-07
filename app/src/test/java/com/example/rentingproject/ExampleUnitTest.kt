@@ -1,4 +1,4 @@
-package com.example.rentingproject
+package eriksu.commercial.rentingproject
 
 import org.junit.Test
 
